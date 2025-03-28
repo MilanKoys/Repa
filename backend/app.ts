@@ -42,6 +42,43 @@ async function generateSession(user: User): Promise<Nullable<string>> {
   return token;
 }
 
+async function userFromToken(token: string): Promise<Nullable<User>> {
+  const sessions: Collection<Session> = database.collection("sessions");
+  const users: Collection<User> = database.collection("users");
+  const session = await sessions.findOne({ token });
+  if (!session) {
+    return null;
+  }
+
+  const user = await users.findOne({ id: session.id });
+  if (!user) {
+    return null;
+  }
+
+  return user;
+}
+
+app.get("/me", async (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    res.status(403);
+    return;
+  }
+
+  const user = await userFromToken(token);
+
+  if (!user) {
+    res.status(403);
+    return;
+  }
+
+  res.json({
+    id: user.id,
+    email: user.email,
+    created: user.created,
+  });
+});
+
 app.post("/login", async (req: Request, res: Response) => {
   const data: ValidationResult<LoginSchema> = loginSchema.validate(req.body);
   if (data.error) {
