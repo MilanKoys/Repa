@@ -108,6 +108,78 @@ app.post("/login", async (req: Request, res: Response) => {
   res.json({ token });
 });
 
+interface Season {
+  id: string;
+  date: number;
+  live: boolean;
+}
+
+const seasonSchema: Joi.ObjectSchema<Season> = Joi.object({
+  date: Joi.number(),
+  live: Joi.boolean(),
+});
+
+app.post("season", async (req, res) => {
+  const data = seasonSchema.validate(req.body);
+  if (data.error) {
+    res.status(401);
+    return;
+  }
+
+  const seasons: Collection<Season> = database.collection("seasons");
+  const foundSeason = await seasons.findOne({ date: data.value.date });
+  if (foundSeason) {
+    res.json({ id: foundSeason.id });
+    return;
+  }
+
+  const id: string = nanoid();
+  const result = await seasons.insertOne({
+    id,
+    date: data.value.date,
+    live: false,
+  });
+
+  if (!result.acknowledged) {
+    res.status(500);
+    return;
+  }
+
+  res.json({ id });
+});
+
+app.get("/season/live", async (req, res) => {
+  const seasons: Collection<Season> = database.collection("seasons");
+  const foundSeason = await seasons.findOne({ live: true });
+
+  if (!foundSeason) {
+    res.json(null);
+    return;
+  }
+
+  res.json(foundSeason);
+});
+
+app.get("/season/:id", async (req, res) => {
+  const id = req.query["id"];
+  if (!id) {
+    res.status(401);
+    return;
+  }
+
+  const seasons: Collection<Season> = database.collection("seasons");
+  const foundSeason = await seasons.findOne({ id });
+
+  if (!foundSeason) {
+    res.status(401);
+    return;
+  }
+
+  await seasons.updateOne({ live: true }, { $set: { live: false } });
+  await seasons.updateOne({ id }, { $set: { live: true } });
+  res.status(200);
+});
+
 app.get("/", (req, res) => {
   res.json({ message: "Hello world!" });
 });
