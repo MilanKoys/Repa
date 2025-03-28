@@ -4,11 +4,11 @@ import { userFromToken, isAdmin } from "../../functions";
 import { Season } from "../../contracts";
 import { Collection } from "mongodb";
 
-export const getSeasonLiveRouter = express.Router();
+export const liveSeasonRouter = express.Router();
 
 const database = db();
 
-getSeasonLiveRouter.get("/season/:id", async (req, res) => {
+liveSeasonRouter.get("/", async (req, res) => {
   const user = await userFromToken(req.headers.authorization);
   if (!user || !isAdmin(user)) {
     res.json(403);

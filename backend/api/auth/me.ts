@@ -1,12 +1,9 @@
-import { db } from "../../database";
 import { userFromToken } from "../../functions";
 import express from "express";
 
 export const meRouter = express.Router();
 
-const database = db();
-
-meRouter.get("/me", async (req, res) => {
+meRouter.get("/", async (req, res) => {
   const user = await userFromToken(req.headers.authorization);
 
   if (!user) {

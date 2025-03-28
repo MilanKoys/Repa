@@ -6,7 +6,7 @@ import { Season } from "../../contracts";
 import { Collection } from "mongodb";
 import { nanoid } from "nanoid";
 
-export const createSeasonRouter = express.Router();
+export const createRouter = express.Router();
 
 const database = db();
 
@@ -15,7 +15,7 @@ const seasonSchema: Joi.ObjectSchema<Season> = Joi.object({
   live: Joi.boolean(),
 });
 
-createSeasonRouter.post("season", async (req, res) => {
+createRouter.post("/", async (req, res) => {
   const user = await userFromToken(req.headers.authorization);
   if (!user || !isAdmin(user)) {
     res.json(403);

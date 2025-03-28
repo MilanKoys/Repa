@@ -5,13 +5,7 @@ import cors from "cors";
 
 import { config } from "./config";
 
-import {
-  createSeasonRouter,
-  getSeasonLiveRouter,
-  loginRouter,
-  meRouter,
-  setSeasonLiveRouter,
-} from "./api";
+import { authRouter, seasonRouter, userRouter } from "./api";
 
 const app = express();
 const port = config?.port ?? 4000;
@@ -21,11 +15,9 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan("tiny"));
 
-app.use(loginRouter);
-app.use(meRouter);
-app.use(createSeasonRouter);
-app.use(setSeasonLiveRouter);
-app.use(getSeasonLiveRouter);
+app.use("/auth", authRouter);
+app.use("/season", seasonRouter);
+app.use("/users", userRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: "Hello world!" });

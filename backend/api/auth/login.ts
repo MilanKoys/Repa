@@ -14,7 +14,7 @@ const loginSchema: Joi.ObjectSchema<LoginSchema> = Joi.object({
   password: Joi.string().required(),
 });
 
-loginRouter.post("/login", async (req: Request, res: Response) => {
+loginRouter.post("/", async (req: Request, res: Response) => {
   const data: ValidationResult<LoginSchema> = loginSchema.validate(req.body);
   if (data.error) {
     res.status(401);
