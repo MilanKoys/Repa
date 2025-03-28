@@ -9,7 +9,7 @@ import { Collection, MongoClient } from "mongodb";
 
 import { config } from "./config";
 import { nanoid } from "nanoid";
-import { LoginSchema, Session, User } from "./contracts";
+import { LoginSchema, Roles, Session, User } from "./contracts";
 
 type Nullable<T> = T | null;
 
@@ -42,7 +42,11 @@ async function generateSession(user: User): Promise<Nullable<string>> {
   return token;
 }
 
-async function userFromToken(token: string): Promise<Nullable<User>> {
+async function userFromToken(token?: string): Promise<Nullable<User>> {
+  if (!token) {
+    return null;
+  }
+
   const sessions: Collection<Session> = database.collection("sessions");
   const users: Collection<User> = database.collection("users");
   const session = await sessions.findOne({ token });
@@ -58,14 +62,12 @@ async function userFromToken(token: string): Promise<Nullable<User>> {
   return user;
 }
 
-app.get("/me", async (req, res) => {
-  const token = req.headers.authorization;
-  if (!token) {
-    res.status(403);
-    return;
-  }
+async function isAdmin(user: User) {
+  return user.roles.findIndex((r) => r === Roles.Admin) > -1;
+}
 
-  const user = await userFromToken(token);
+app.get("/me", async (req, res) => {
+  const user = await userFromToken(req.headers.authorization);
 
   if (!user) {
     res.status(403);
@@ -120,6 +122,12 @@ const seasonSchema: Joi.ObjectSchema<Season> = Joi.object({
 });
 
 app.post("season", async (req, res) => {
+  const user = await userFromToken(req.headers.authorization);
+  if (!user || !isAdmin(user)) {
+    res.json(403);
+    return;
+  }
+
   const data = seasonSchema.validate(req.body);
   if (data.error) {
     res.status(401);
@@ -161,6 +169,12 @@ app.get("/season/live", async (req, res) => {
 });
 
 app.get("/season/:id", async (req, res) => {
+  const user = await userFromToken(req.headers.authorization);
+  if (!user || !isAdmin(user)) {
+    res.json(403);
+    return;
+  }
+
   const id = req.query["id"];
   if (!id) {
     res.status(401);
