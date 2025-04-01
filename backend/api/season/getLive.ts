@@ -17,7 +17,7 @@ liveSeasonRouter.get("/", async (req, res) => {
 
   const id = req.query["id"];
   if (!id) {
-    res.status(401);
+    res.sendStatus(401);
     return;
   }
 
@@ -25,11 +25,11 @@ liveSeasonRouter.get("/", async (req, res) => {
   const foundSeason = await seasons.findOne({ id });
 
   if (!foundSeason) {
-    res.status(401);
+    res.sendStatus(401);
     return;
   }
 
   await seasons.updateOne({ live: true }, { $set: { live: false } });
   await seasons.updateOne({ id }, { $set: { live: true } });
-  res.status(200);
+  res.sendStatus(200);
 });

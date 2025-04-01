@@ -15,7 +15,7 @@ listUsersRouter.get(
     const user = await userFromToken(req.headers.authorization);
 
     if (!user || !isAdmin(user)) {
-      res.status(403);
+      res.sendStatus(403);
       return;
     }
 

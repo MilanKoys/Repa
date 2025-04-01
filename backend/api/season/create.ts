@@ -24,7 +24,7 @@ createRouter.post("/", async (req, res) => {
 
   const data = seasonSchema.validate(req.body);
   if (data.error) {
-    res.status(401);
+    res.sendStatus(401);
     return;
   }
 
@@ -43,7 +43,7 @@ createRouter.post("/", async (req, res) => {
   });
 
   if (!result.acknowledged) {
-    res.status(500);
+    res.sendStatus(500);
     return;
   }
 

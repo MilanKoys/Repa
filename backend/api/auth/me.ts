@@ -7,7 +7,7 @@ meRouter.get("/", async (req, res) => {
   const user = await userFromToken(req.headers.authorization);
 
   if (!user) {
-    res.status(403);
+    res.sendStatus(403);
     return;
   }
 

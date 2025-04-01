@@ -17,7 +17,7 @@ const loginSchema: Joi.ObjectSchema<LoginSchema> = Joi.object({
 loginRouter.post("/", async (req: Request, res: Response) => {
   const data: ValidationResult<LoginSchema> = loginSchema.validate(req.body);
   if (data.error) {
-    res.status(401);
+    res.sendStatus(401);
     return;
   }
 
@@ -30,13 +30,13 @@ loginRouter.post("/", async (req: Request, res: Response) => {
     !foundUser ||
     !bcrypt.compareSync(data.value.password, foundUser.password)
   ) {
-    res.status(403);
+    res.sendStatus(403);
     return;
   }
 
   const token = await generateSession(foundUser);
   if (!token) {
-    res.status(500);
+    res.sendStatus(500);
     return;
   }
 
