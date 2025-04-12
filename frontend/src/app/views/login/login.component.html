@@ -1,0 +1,27 @@
+<div class="flex justify-center items-center w-full h-full">
+  <div
+    class="border border-standard dark:border-standard-dark p-4 rounded-lg max-w-xl w-full mx-4 flex flex-col gap-4 shadow-box"
+  >
+    <div class="flex gap-3 items-center">
+      <div
+        class="bg-primary size-18 hidden justify-center items-center rounded-xl sm:flex"
+      >
+        <img src="logo_white.svg" alt="logo" />
+      </div>
+      <div>
+        <h3 class="text-3xl font-semibold">Sign in</h3>
+        <p class="tracking-tight">Enter your credentials to sign in</p>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <app-input type="text" label="Email" />
+      <div class="flex flex-col gap-1 mb-3">
+        <app-input type="password" label="Password" />
+        <a class="text-primary">Forgot password</a>
+      </div>
+      <button class="bg-primary w-full p-3 rounded-lg text-white font-semibold">
+        Login
+      </button>
+    </div>
+  </div>
+</div>
