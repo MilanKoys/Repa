@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { State, Action, StateContext } from '@ngxs/store';
+import { State, Action, StateContext, StateToken } from '@ngxs/store';
 import { UserActions } from './user.actions';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
@@ -13,8 +13,10 @@ const defaults: UserStateModel = {
   token: null,
 };
 
+export const userStateToken = new StateToken<UserStateModel[]>('user');
+
 @State<UserStateModel>({
-  name: 'user',
+  name: userStateToken,
   defaults,
 })
 @Injectable()
@@ -23,7 +25,7 @@ export class UserState {
 
   @Action(UserActions.Reset)
   reset({ patchState }: StateContext<UserStateModel>) {
-    patchState(defaults);
+    return patchState(defaults);
   }
 
   @Action(UserActions.Login)
@@ -31,8 +33,8 @@ export class UserState {
     { patchState }: StateContext<UserStateModel>,
     payload: UserActions.Login
   ) {
-    this._httpClient
-      .post('login', payload)
+    return this._httpClient
+      .post('http://localhost:3000/auth/login', payload)
       .pipe(tap((token) => patchState(token)));
   }
 }

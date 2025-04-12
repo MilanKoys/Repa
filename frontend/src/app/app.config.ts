@@ -11,7 +11,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideStore([UserState], withNgxsReduxDevtoolsPlugin()),
     provideHttpClient(),
+    provideStore([UserState], withNgxsReduxDevtoolsPlugin()),
   ],
 };
