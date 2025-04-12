@@ -40,7 +40,6 @@ export class InputComponent implements AfterViewInit {
   onInput(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.value = inputElement.value;
-    if (!this.value.length) return this.onChange(null);
     this.onChange(this.value);
   }
 
