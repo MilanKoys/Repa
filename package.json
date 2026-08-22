@@ -1,0 +1,21 @@
+{
+  "name": "repa",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "Milan Koyš",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "build-watch": "tsc --watch",
+    "run-watch": "nodemon ./build/app.js"
+  },
+  "imports": {
+    "#helpers": "./build/helpers/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "nodemon": "^3.1.14",
+    "typescript": "^7.0.2"
+  }
+}
