@@ -1,15 +1,15 @@
 import type { IncomingMessage } from "http";
 
-import type { HandlerResponse } from "./handler.js";
+import type { HandlerRequest, HandlerResponse } from "./handler.js";
 
 export type MiddlewareMethod = (
-  request: IncomingMessage,
+  request: HandlerRequest,
   response: HandlerResponse,
   next: () => void,
 ) => void;
 
 export type RouteMethod = (
-  request: IncomingMessage,
+  request: HandlerRequest,
   response: HandlerResponse,
 ) => void;
 

@@ -3,6 +3,7 @@ import { join } from "path";
 import { statSync, readdirSync, readFileSync, Stats } from "fs";
 
 import type {
+  HandlerRequest,
   HandlerResponse,
   MiddlewareMethod,
   RouteMap,
@@ -41,7 +42,17 @@ export class Api {
     );
   }
 
-  private requestHandler(request: IncomingMessage, response: ServerResponse) {
+  private async requestHandler(
+    request: IncomingMessage,
+    response: ServerResponse,
+  ) {
+    const body: string = await buildRequestBody(request);
+
+    const handlerRequest: HandlerRequest = {
+      ...request,
+      body,
+    };
+
     const handlerRespsonse: HandlerResponse = {
       write: (data: string) => response.write(data),
       end: () => response.end(),
@@ -51,7 +62,7 @@ export class Api {
       },
     };
 
-    const callRoute = (request: IncomingMessage, response: HandlerResponse) => {
+    const callRoute = (request: HandlerRequest, response: HandlerResponse) => {
       const url: Undefined<string> = request.url;
       if (!url) return response.end();
 
@@ -83,7 +94,7 @@ export class Api {
     const next = () => {
       const stackMethod = requestStack[stackIndex];
       stackIndex++;
-      if (stackMethod) stackMethod(request, handlerRespsonse, next);
+      if (stackMethod) stackMethod(handlerRequest, handlerRespsonse, next);
     };
 
     next();
@@ -141,4 +152,18 @@ export class Api {
   listen(port: number, callback?: () => void) {
     this.http.listen(port, callback);
   }
+}
+
+async function buildRequestBody(request: IncomingMessage): Promise<string> {
+  return new Promise((resolve) => {
+    let bodyPartial: any = [];
+    let body: string = "";
+
+    request
+      .on("data", (chunk) => bodyPartial.push(chunk))
+      .on("end", () => {
+        body = Buffer.concat(bodyPartial).toString();
+        resolve(body);
+      });
+  });
 }

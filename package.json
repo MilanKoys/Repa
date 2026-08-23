@@ -8,7 +8,7 @@
   "main": "app.js",
   "scripts": {
     "build-watch": "tsc --watch",
-    "run-watch": "nodemon ./build/app.js"
+    "run-watch": "nodemon --ignore ./database ./build/app.js"
   },
   "imports": {
     "#helpers": "./build/helpers/index.js"
