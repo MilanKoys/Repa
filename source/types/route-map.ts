@@ -1,22 +1,23 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
+
+import type { HandlerResponse } from "./handler.js";
 
 export type MiddlewareMethod = (
   request: IncomingMessage,
-  response: ServerResponse,
+  response: HandlerResponse,
   next: () => void,
 ) => void;
 
 export type RouteMethod = (
   request: IncomingMessage,
-  response: ServerResponse,
+  response: HandlerResponse,
 ) => void;
 
 export type RouteMapMethod = RouteMethod | MiddlewareMethod;
 
 export interface RouteMap {
-  middleware: Set<MiddlewareMethod>;
-  get: Map<string, RouteMethod>;
-  post: Map<string, RouteMethod>;
-  put: Map<string, RouteMethod>;
-  delete: Map<string, RouteMethod>;
+  GET: Map<string, RouteMethod>;
+  POST: Map<string, RouteMethod>;
+  PUT: Map<string, RouteMethod>;
+  DELETE: Map<string, RouteMethod>;
 }

@@ -3,22 +3,33 @@ import { join } from "path";
 import { statSync, readdirSync, readFileSync, Stats } from "fs";
 
 import type {
+  HandlerResponse,
   MiddlewareMethod,
   RouteMap,
   RouteMapMethod,
+  RouteMethod,
   Undefined,
 } from "@types";
 import { basePath } from "#helpers";
 
+const HEADERS = {
+  contentType: "Content-Type",
+};
+
+const CONTENT_TYPES = {
+  json: "application/json",
+};
+
 export class Api {
   private http: Server;
 
+  private middlewareSet: Set<MiddlewareMethod> = new Set();
+
   private routeMap: RouteMap = {
-    middleware: new Set(),
-    get: new Map(),
-    post: new Map(),
-    delete: new Map(),
-    put: new Map(),
+    GET: new Map(),
+    POST: new Map(),
+    DELETE: new Map(),
+    PUT: new Map(),
   };
 
   private dynamicRouteSet: Set<string> = new Set();
@@ -31,7 +42,16 @@ export class Api {
   }
 
   private requestHandler(request: IncomingMessage, response: ServerResponse) {
-    const callRoute = (request: IncomingMessage, response: ServerResponse) => {
+    const handlerRespsonse: HandlerResponse = {
+      write: (data: string) => response.write(data),
+      end: () => response.end(),
+      json: (object: Object) => {
+        response.setHeader(HEADERS.contentType, CONTENT_TYPES.json);
+        response.write(JSON.stringify(object));
+      },
+    };
+
+    const callRoute = (request: IncomingMessage, response: HandlerResponse) => {
       const url: Undefined<string> = request.url;
       if (!url) return response.end();
 
@@ -39,23 +59,31 @@ export class Api {
 
       for (const path of this.dynamicRouteSet.keys()) {
         const foundFileContent = this.readFileByUrl(parsedUrl, path);
-        if (foundFileContent) response.write(foundFileContent);
+        if (foundFileContent) {
+          response.write(foundFileContent);
+        } else {
+          const method: Undefined<string> = request.method;
+          if (!method) return response.end();
+          if (Object.keys(this.routeMap).find((key) => key === method)) {
+            const routeMethod: Undefined<RouteMethod> =
+              this.routeMap[method as keyof RouteMap].get(url);
+            if (!routeMethod) return response.end();
+            routeMethod(request, handlerRespsonse);
+          }
+        }
       }
 
       response.end();
     };
 
-    const requestStack: RouteMapMethod[] = [
-      ...this.routeMap.middleware,
-      callRoute,
-    ];
+    const requestStack: RouteMapMethod[] = [...this.middlewareSet, callRoute];
 
     let stackIndex: number = 0;
 
     const next = () => {
       const stackMethod = requestStack[stackIndex];
       stackIndex++;
-      if (stackMethod) stackMethod(request, response, next);
+      if (stackMethod) stackMethod(request, handlerRespsonse, next);
     };
 
     next();
@@ -91,7 +119,23 @@ export class Api {
   }
 
   use(middleware: MiddlewareMethod) {
-    this.routeMap.middleware.add(middleware);
+    this.middlewareSet.add(middleware);
+  }
+
+  get(route: string, routeMethod: RouteMethod) {
+    this.routeMap.GET.set(route, routeMethod);
+  }
+
+  post(route: string, routeMethod: RouteMethod) {
+    this.routeMap.POST.set(route, routeMethod);
+  }
+
+  put(route: string, routeMethod: RouteMethod) {
+    this.routeMap.PUT.set(route, routeMethod);
+  }
+
+  delete(route: string, routeMethod: RouteMethod) {
+    this.routeMap.DELETE.set(route, routeMethod);
   }
 
   listen(port: number, callback?: () => void) {

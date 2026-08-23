@@ -1,4 +1,6 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
+
+import type { HandlerResponse } from "@types";
 
 import { Api } from "./api.js";
 
@@ -9,7 +11,7 @@ const PUBLIC_PATH: string = "/public";
 
 const rootRedirect = (
   request: IncomingMessage,
-  response: ServerResponse,
+  _response: HandlerResponse,
   next: () => void,
 ) => {
   if (request.url === ROOT_URL) {
