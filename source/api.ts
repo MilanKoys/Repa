@@ -2,28 +2,13 @@ import { createServer, IncomingMessage, Server, ServerResponse } from "http";
 import { join } from "path";
 import { statSync, readdirSync, readFileSync, Stats } from "fs";
 
-import type { Undefined } from "@types";
+import type {
+  MiddlewareMethod,
+  RouteMap,
+  RouteMapMethod,
+  Undefined,
+} from "@types";
 import { basePath } from "#helpers";
-
-type Route = () => void;
-
-type MiddlewareMethod = (
-  request: IncomingMessage,
-  response: ServerResponse,
-  next: () => void,
-) => void;
-
-type RouteMethod = (request: IncomingMessage, response: ServerResponse) => void;
-
-type RouteMethods = RouteMethod | MiddlewareMethod;
-
-interface RouteMap {
-  middleware: Set<MiddlewareMethod>;
-  get: Map<string, Route>;
-  post: Map<string, Route>;
-  put: Map<string, Route>;
-  delete: Map<string, Route>;
-}
 
 export class Api {
   private http: Server;
@@ -60,7 +45,7 @@ export class Api {
       response.end();
     };
 
-    const requestStack: RouteMethods[] = [
+    const requestStack: RouteMapMethod[] = [
       ...this.routeMap.middleware,
       callRoute,
     ];
