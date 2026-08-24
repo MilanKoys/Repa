@@ -11,7 +11,8 @@
     "run-watch": "nodemon --ignore ./database ./build/app.js"
   },
   "imports": {
-    "#helpers": "./build/helpers/index.js"
+    "#helpers": "./build/helpers/index.js",
+    "#middleware": "./build/middleware/index.js"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
