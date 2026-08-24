@@ -1,4 +1,4 @@
-import type { HandlerRequest, HandlerResponse, Undefined } from "@types";
+import type { HandlerRequest, HandlerResponse } from "@types";
 
 import { Validator } from "./validator.js";
 import { Api } from "./api.js";

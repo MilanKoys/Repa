@@ -7,6 +7,10 @@ import usersRouter from "./users.js";
 const PORT: number = 4200;
 const PUBLIC_PATH: string = "/public";
 
+const RUNNING_MESSAGE = `Running on http://localhost:${PORT}`;
+
+const USERS_ROUTE = "/users";
+
 const api: Api = new Api();
 
 const database: Database = new Database();
@@ -14,11 +18,11 @@ const database: Database = new Database();
 api.use(rootRedirect);
 api.use(jsonBody);
 
-api.useRouter("/users", usersRouter);
+api.useRouter(USERS_ROUTE, usersRouter);
 
 api.publicDynamic(PUBLIC_PATH);
 
-api.listen(PORT, () => console.log(`Running on http://localhost:${PORT}`));
+api.listen(PORT, () => console.log(RUNNING_MESSAGE));
 
 export function application() {
   return { api, database };

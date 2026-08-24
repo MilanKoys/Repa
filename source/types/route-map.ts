@@ -1,5 +1,3 @@
-import type { IncomingMessage } from "http";
-
 import type { HandlerRequest, HandlerResponse } from "./handler.js";
 
 export type MiddlewareMethod = (

@@ -1,9 +1,12 @@
-import { basePath } from "#helpers";
-import type { Undefined } from "@types";
 import { readdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const DATABASE_PATH = "/database";
+import type { Undefined } from "@types";
+
+import { basePath } from "#helpers";
+
+const DATABASE_PATH: string = "/database";
+const ENCODING: "utf-8" = "utf-8";
 
 const databasePath: string = join(basePath(), DATABASE_PATH);
 
@@ -20,7 +23,7 @@ export class Database {
     for (const collectionName of collectionsNames) {
       const collectionPath: string = join(databasePath, collectionName);
       this.store[collectionName] = JSON.parse(
-        readFileSync(collectionPath, "utf-8"),
+        readFileSync(collectionPath, ENCODING),
       );
     }
   }
@@ -31,7 +34,7 @@ export class Database {
       writeFileSync(
         collectionPath,
         JSON.stringify(this.store[collectionName]),
-        "utf-8",
+        ENCODING,
       );
     }
   }
@@ -41,7 +44,7 @@ export class Database {
     writeFileSync(
       collectionPath,
       JSON.stringify(this.store[collectionName]),
-      "utf-8",
+      ENCODING,
     );
   }
 
