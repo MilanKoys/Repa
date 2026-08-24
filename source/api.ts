@@ -11,7 +11,7 @@ import type {
   RouteMethod,
   Undefined,
 } from "@types";
-import { basePath } from "#helpers";
+import { basePath, buildRequestBody } from "#helpers";
 
 const HEADERS = {
   contentType: "Content-Type",
@@ -24,16 +24,16 @@ const CONTENT_TYPES = {
 export class Api {
   private http: Server;
 
-  private middlewareSet: Set<MiddlewareMethod> = new Set();
+  protected middlewareSet: Set<MiddlewareMethod> = new Set();
 
-  private routeMap: RouteMap = {
+  protected routeMap: RouteMap = {
     GET: new Map(),
     POST: new Map(),
     DELETE: new Map(),
     PUT: new Map(),
   };
 
-  private dynamicRouteSet: Set<string> = new Set();
+  protected dynamicRouteSet: Set<string> = new Set();
 
   constructor() {
     this.http = createServer(
@@ -133,6 +133,17 @@ export class Api {
     this.middlewareSet.add(middleware);
   }
 
+  useRouter(route: string, router: Api) {
+    for (const key of Object.keys(router.routeMap)) {
+      for (const [routeName, method] of router.routeMap[
+        key as keyof RouteMap
+      ].entries()) {
+        const fullRoute: string = join(route, routeName);
+        this.routeMap[key as keyof RouteMap].set(fullRoute, method);
+      }
+    }
+  }
+
   get(route: string, routeMethod: RouteMethod) {
     this.routeMap.GET.set(route, routeMethod);
   }
@@ -152,18 +163,4 @@ export class Api {
   listen(port: number, callback?: () => void) {
     this.http.listen(port, callback);
   }
-}
-
-async function buildRequestBody(request: IncomingMessage): Promise<string> {
-  return new Promise((resolve) => {
-    let bodyPartial: any = [];
-    let body: string = "";
-
-    request
-      .on("data", (chunk) => bodyPartial.push(chunk))
-      .on("end", () => {
-        body = Buffer.concat(bodyPartial).toString();
-        resolve(body);
-      });
-  });
 }

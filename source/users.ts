@@ -1,14 +1,28 @@
-import type { HandlerRequest, HandlerResponse } from "@types";
+import type { HandlerRequest, HandlerResponse, Undefined } from "@types";
 
-import { application } from "./app.js";
+import { Validator } from "./validator.js";
+import { Api } from "./api.js";
 
-export function users() {
-  const app = application();
-
-  app.api.post(
-    "/register",
-    (request: HandlerRequest, response: HandlerResponse) => {
-      console.log(request.body);
-    },
-  );
+interface CreateUser {
+  username: string;
+  email: string;
+  password: string;
 }
+
+const router = new Api();
+
+const validator = new Validator();
+
+router.post(
+  "/register",
+  (request: HandlerRequest, response: HandlerResponse) => {
+    const body: Partial<CreateUser> = request.body;
+    const createUserSchema = validator.object({
+      username: validator.string().required(),
+    });
+
+    response.json({ result: createUserSchema.validate(body) });
+  },
+);
+
+export default router;

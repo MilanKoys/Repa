@@ -6,4 +6,4 @@ export interface HandlerResponse {
   end: () => void;
 }
 
-export type HandlerRequest = Partial<IncomingMessage> & { body: string };
+export type HandlerRequest = Partial<IncomingMessage> & { body: any };
