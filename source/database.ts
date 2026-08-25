@@ -66,6 +66,11 @@ export class Database {
     return findBy(this.store[collectionName], search) as Undefined<T>;
   }
 
+  find<T>(collectionName: string, search: Object): T[] {
+    if (!this.store[collectionName]) this.store[collectionName] = [];
+    return filterBy(this.store[collectionName], search) as T[];
+  }
+
   getCollection(collectionName: string): Undefined<Object> {
     return this.store[collectionName];
   }
@@ -76,6 +81,14 @@ function findBy<T extends object>(
   search: Partial<T>,
 ): Undefined<T> {
   return items.find((obj) =>
+    Object.entries(search).every(
+      ([key, value]) => obj[key as keyof T] === value,
+    ),
+  );
+}
+
+function filterBy<T extends object>(items: T[], search: Partial<T>): T[] {
+  return items.filter((obj) =>
     Object.entries(search).every(
       ([key, value]) => obj[key as keyof T] === value,
     ),

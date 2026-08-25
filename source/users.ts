@@ -22,9 +22,75 @@ const HASH_LENGTH: number = 10;
 const HASH_ENCODING: "hex" = "hex";
 const HASH_SALT: string = "salt";
 
+const DEFAULT_TAKE: string = "10";
+const DEFAULT_SKIP: string = "0";
+
 const router = new Api();
 
 const validator = new Validator();
+
+router.get("/list", (request: HandlerRequest, response: HandlerResponse) => {
+  if (!request.headers) {
+    response.status(400);
+    return response.end();
+  }
+
+  const token: Undefined<string> = request.headers.authorization;
+
+  if (!token) {
+    response.status(401);
+    return response.end();
+  }
+
+  const session: Undefined<Session> = database.findOne<Session>(
+    SESSIONS_COLLECTION,
+    { token },
+  );
+
+  if (!session) {
+    response.status(401);
+    return response.end();
+  }
+
+  const user: Undefined<User> = database.findOne(USERS_COLLECTION, {
+    email: session.email,
+  });
+
+  if (!user) {
+    response.status(401);
+    return response.end();
+  }
+
+  if (user.role !== Role.ADMIN) {
+    response.status(403);
+    return response.end();
+  }
+
+  const takeString: Undefined<string | string[]> =
+    request.headers.take ?? DEFAULT_TAKE;
+  const skipString: Undefined<string | string[]> =
+    request.headers.skip ?? DEFAULT_SKIP;
+
+  if (typeof takeString !== "string" || typeof skipString !== "string") {
+    response.status(400);
+    return response.end();
+  }
+
+  const take: number = parseInt(takeString);
+  const skip: number = parseInt(skipString);
+
+  const users: User[] = database
+    .find<User>(USERS_COLLECTION, "")
+    .slice(skip, take + skip);
+
+  const stripperUsers: Partial<User>[] = users.map((user): Partial<User> => {
+    let partialUser: Partial<User> = user;
+    delete partialUser.password;
+    return user;
+  });
+
+  response.json(stripperUsers);
+});
 
 router.get("/logout", (request: HandlerRequest, response: HandlerResponse) => {
   if (!request.headers) {
