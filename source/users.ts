@@ -1,28 +1,17 @@
 import { scryptSync, timingSafeEqual } from "crypto";
 
-import type { HandlerRequest, HandlerResponse, Undefined } from "@types";
+import type {
+  CreateUser,
+  HandlerRequest,
+  HandlerResponse,
+  LoginUser,
+  Undefined,
+  User,
+} from "@types";
 
 import { Validator } from "./validator.js";
 import { Api } from "./api.js";
 import { database } from "./database.js";
-
-interface CreateUser {
-  username: string;
-  email: string;
-  password: string;
-}
-
-interface LoginUser {
-  email: string;
-  password: string;
-}
-
-interface User {
-  username: string;
-  email: string;
-  password: string;
-  created: number;
-}
 
 const USERS_COLLECTION: string = "users";
 
