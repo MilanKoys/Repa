@@ -8,6 +8,7 @@
       "@types": ["./source/types/index.ts"],
       "#helpers": ["./source/helpers/index.ts"],
       "#middleware": ["./source/middleware/index.ts"],
+      "#enums": ["./source/enums/index.ts"],
     },
 
     // Environment Settings

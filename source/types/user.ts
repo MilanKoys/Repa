@@ -1,3 +1,5 @@
+import type { Role } from "#enums";
+
 export interface CreateUser {
   username: string;
   email: string;
@@ -14,4 +16,5 @@ export interface User {
   email: string;
   password: string;
   created: number;
+  role: Role;
 }

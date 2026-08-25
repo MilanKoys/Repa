@@ -12,6 +12,7 @@ import type {
 import { Validator } from "./validator.js";
 import { Api } from "./api.js";
 import { database } from "./database.js";
+import { Role } from "#enums";
 
 interface Session {
   token: string;
@@ -117,6 +118,7 @@ router.post(
       ...body,
       password: hash,
       created: new Date().getTime(),
+      role: Role.USER,
     });
   },
 );

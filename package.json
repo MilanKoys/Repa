@@ -12,7 +12,8 @@
   },
   "imports": {
     "#helpers": "./build/helpers/index.js",
-    "#middleware": "./build/middleware/index.js"
+    "#middleware": "./build/middleware/index.js",
+    "#enums": "./build/enums/index.js"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
