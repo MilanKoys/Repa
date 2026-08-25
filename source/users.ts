@@ -21,6 +21,7 @@ interface User {
   username: string;
   email: string;
   password: string;
+  created: number;
 }
 
 const USERS_COLLECTION: string = "users";
@@ -86,9 +87,10 @@ router.post(
       HASH_LENGTH,
     ).toString(HASH_ENCODING);
 
-    database.insertOne(USERS_COLLECTION, {
+    database.insertOne<User>(USERS_COLLECTION, {
       ...body,
       password: hash,
+      created: new Date().getTime(),
     });
   },
 );

@@ -48,7 +48,7 @@ export class Database {
     );
   }
 
-  insertOne(collectionName: string, document: Object) {
+  insertOne<T extends Object>(collectionName: string, document: T) {
     if (!this.store[collectionName]) this.store[collectionName] = [];
     this.store[collectionName]?.push(document);
     this.writeDatabaseCollection(collectionName);
