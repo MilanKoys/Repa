@@ -54,9 +54,9 @@ export class Database {
     this.writeDatabaseCollection(collectionName);
   }
 
-  findOne(collectionName: string, search: Object) {
+  findOne<T>(collectionName: string, search: Object): Undefined<T> {
     if (!this.store[collectionName]) this.store[collectionName] = [];
-    return findBy(this.store[collectionName], search);
+    return findBy(this.store[collectionName], search) as Undefined<T>;
   }
 
   getCollection(collectionName: string): Undefined<Object> {

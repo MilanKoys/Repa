@@ -1,11 +1,23 @@
-import { scryptSync } from "crypto";
-import type { HandlerRequest, HandlerResponse } from "@types";
+import { scryptSync, timingSafeEqual } from "crypto";
+
+import type { HandlerRequest, HandlerResponse, Undefined } from "@types";
 
 import { Validator } from "./validator.js";
 import { Api } from "./api.js";
 import { database } from "./database.js";
 
 interface CreateUser {
+  username: string;
+  email: string;
+  password: string;
+}
+
+interface LoginUser {
+  email: string;
+  password: string;
+}
+
+interface User {
   username: string;
   email: string;
   password: string;
@@ -21,6 +33,33 @@ const router = new Api();
 
 const validator = new Validator();
 
+router.get(
+  "/login",
+  async (request: HandlerRequest, response: HandlerResponse) => {
+    const body: LoginUser = request.body;
+    const loginUserSchema = validator.object({
+      email: validator.string().email().required(),
+      password: validator.string().min(8).required(),
+    });
+
+    const validation = loginUserSchema.validate(body);
+    if (!validation) return response.json({ error: "invalid body" });
+
+    const user: Undefined<User> = database.findOne(USERS_COLLECTION, {
+      email: body.email,
+    });
+
+    if (!user) return response.json({ error: "invalid credentials" });
+
+    const keyBuffer: Buffer = scryptSync(body.password, HASH_SALT, HASH_LENGTH);
+    const passwordBuffer: Buffer = Buffer.from(user.password, HASH_ENCODING);
+
+    const passwordMatch: boolean = timingSafeEqual(keyBuffer, passwordBuffer);
+
+    if (!passwordMatch) return response.json({ error: "invalid credentials" });
+  },
+);
+
 router.post(
   "/register",
   (request: HandlerRequest, response: HandlerResponse) => {
@@ -32,10 +71,16 @@ router.post(
     });
 
     const validation = createUserSchema.validate(body);
-
     if (!validation) return response.json({ error: "invalid body" });
 
-    const passwordHash = scryptSync(
+    if (
+      database.findOne(USERS_COLLECTION, { username: body.username }) ||
+      database.findOne(USERS_COLLECTION, { email: body.email })
+    ) {
+      return response.json({ error: "user already exists" });
+    }
+
+    const hash: string = scryptSync(
       body.password,
       HASH_SALT,
       HASH_LENGTH,
@@ -43,7 +88,7 @@ router.post(
 
     database.insertOne(USERS_COLLECTION, {
       ...body,
-      password: passwordHash,
+      password: hash,
     });
   },
 );
