@@ -19,6 +19,7 @@ router.post(
     const body: Partial<CreateUser> = request.body;
     const createUserSchema = validator.object({
       username: validator.string().required(),
+      email: validator.string().min(3).required(),
     });
 
     response.json({ result: createUserSchema.validate(body) });

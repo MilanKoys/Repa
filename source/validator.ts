@@ -3,15 +3,75 @@ import type { Undefined, ValidatorRules } from "@types";
 export class Validator {
   schema: Undefined<{ [key: string]: Validator }>;
   type: Undefined<string>;
+  valueType: Undefined<string>;
   rules: ValidatorRules = {
     required: false,
   };
   mandatory: boolean = false;
 
+  private getValidator(): Validator {
+    if (this.type) return new Validator();
+    return this;
+  }
+
   private validateKeys(data: any) {
     const schema = this.schema;
     if (!schema) return false;
-    return Object.keys(schema).every((key) => Object.keys(data).includes(key));
+    return Object.keys(schema).every((key) => {
+      const schemaValidator: Undefined<Validator> = schema[key];
+      const schemaValue: Undefined<any> = data[key];
+
+      if (!schemaValidator) return false;
+      if (!schemaValidator.rules.required) return true;
+      if (!schemaValidator.validate(schemaValue)) return false;
+
+      return Object.keys(data).includes(key);
+    });
+  }
+
+  private validateString(data: any) {
+    if (this.rules.min) {
+      if (data.length < this.rules.min) return false;
+    }
+
+    if (this.rules.max) {
+      if (data.length > this.rules.max) return false;
+    }
+
+    return true;
+  }
+
+  private validateType(data: any) {
+    if (this.rules.required) {
+      if (typeof data === "undefined" || data === null) return false;
+    }
+
+    switch (this.type) {
+      case "string":
+        if (!this.validateString(data)) return false;
+        break;
+      default:
+        return true;
+    }
+
+    return true;
+  }
+
+  string() {
+    const validator = this.getValidator();
+    validator.type = "string";
+    validator.valueType = "string";
+
+    return validator;
+  }
+
+  object(data: { [key: string]: Validator }) {
+    const validator = this.getValidator();
+    validator.schema = data;
+    validator.type = "object";
+    validator.valueType = "object";
+
+    return validator;
   }
 
   required() {
@@ -19,19 +79,19 @@ export class Validator {
     return this;
   }
 
-  string() {
-    this.type = "string";
+  min(length: number) {
+    this.rules.min = length;
     return this;
   }
 
-  object(data: { [key: string]: Validator }) {
-    this.schema = data;
-    this.type = "object";
+  max(length: number) {
+    this.rules.max = length;
     return this;
   }
 
   validate(data: any) {
-    if (typeof data !== this.type) return false;
+    if (typeof data !== this.valueType) return false;
+    if (!this.validateType(data)) return false;
 
     if (this.type === "object" && this.schema) {
       if (!this.validateKeys(data)) {
