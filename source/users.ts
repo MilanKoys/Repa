@@ -5,6 +5,7 @@ import type {
   HandlerRequest,
   HandlerResponse,
   LoginUser,
+  Session,
   Undefined,
   User,
 } from "@types";
@@ -13,12 +14,6 @@ import { Validator } from "./validator.js";
 import { Api } from "./api.js";
 import { database } from "./database.js";
 import { Role } from "#enums";
-
-interface Session {
-  token: string;
-  created: number;
-  email: string;
-}
 
 const USERS_COLLECTION: string = "users";
 const SESSIONS_COLLECTION: string = "sessions";

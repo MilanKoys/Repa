@@ -7,3 +7,5 @@ export * from "./handler.js";
 export * from "./validation.js";
 
 export * from "./user.js";
+
+export * from "./session.js";
