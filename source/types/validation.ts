@@ -1,5 +1,6 @@
 export interface ValidatorMandatoryRules {
   required: boolean;
+  strict: boolean;
 }
 
 export type ValidatorOptionalRules = Partial<{

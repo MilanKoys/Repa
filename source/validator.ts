@@ -6,6 +6,7 @@ export class Validator {
   valueType: Undefined<string>;
   rules: ValidatorRules = {
     required: false,
+    strict: true,
   };
   mandatory: boolean = false;
 
@@ -17,6 +18,14 @@ export class Validator {
   private validateKeys(data: any) {
     const schema = this.schema;
     if (!schema) return false;
+
+    if (this.rules.strict) {
+      const dataKeys: string[] = Object.keys(data);
+      if (!dataKeys.every((key) => Object.keys(schema).includes(key))) {
+        return false;
+      }
+    }
+
     return Object.keys(schema).every((key) => {
       const schemaValidator: Undefined<Validator> = schema[key];
       const schemaValue: Undefined<any> = data[key];
@@ -80,6 +89,11 @@ export class Validator {
 
   required() {
     this.rules.required = true;
+    return this;
+  }
+
+  loose() {
+    this.rules.strict = false;
     return this;
   }
 

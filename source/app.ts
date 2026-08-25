@@ -13,8 +13,6 @@ const USERS_ROUTE = "/users";
 
 const api: Api = new Api();
 
-const database: Database = new Database();
-
 api.use(rootRedirect);
 api.use(jsonBody);
 
@@ -23,7 +21,3 @@ api.useRouter(USERS_ROUTE, usersRouter);
 api.publicDynamic(PUBLIC_PATH);
 
 api.listen(PORT, () => console.log(RUNNING_MESSAGE));
-
-export function application() {
-  return { api, database };
-}

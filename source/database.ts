@@ -74,3 +74,5 @@ function findBy<T extends object>(
     ),
   );
 }
+
+export const database = new Database();
