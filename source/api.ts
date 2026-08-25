@@ -57,6 +57,7 @@ export class Api {
     const handlerRespsonse: HandlerResponse = {
       write: (data: string) => response.write(data),
       end: () => response.end(),
+      status: (statusCode: number) => (response.statusCode = statusCode),
       json: (object: Object) => {
         response.setHeader(HEADERS.contentType, CONTENT_TYPES.json);
         response.write(JSON.stringify(object));

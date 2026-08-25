@@ -9,7 +9,7 @@ export const jsonBody = (
     request.body = JSON.parse(request.body);
     next();
   } catch (error) {
-    console.error(error);
+    response.status(400);
     response.end();
   }
 };
