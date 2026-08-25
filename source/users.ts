@@ -1,4 +1,4 @@
-import { scryptSync, timingSafeEqual } from "crypto";
+import { scryptSync, timingSafeEqual, randomUUID } from "crypto";
 
 import type {
   CreateUser,
@@ -13,7 +13,14 @@ import { Validator } from "./validator.js";
 import { Api } from "./api.js";
 import { database } from "./database.js";
 
+interface Session {
+  token: string;
+  created: number;
+  email: string;
+}
+
 const USERS_COLLECTION: string = "users";
+const SESSIONS_COLLECTION: string = "sessions";
 
 const HASH_LENGTH: number = 10;
 const HASH_ENCODING: "hex" = "hex";
@@ -23,32 +30,62 @@ const router = new Api();
 
 const validator = new Validator();
 
-router.get(
-  "/login",
-  async (request: HandlerRequest, response: HandlerResponse) => {
-    const body: LoginUser = request.body;
-    const loginUserSchema = validator.object({
-      email: validator.string().email().required(),
-      password: validator.string().min(8).required(),
-    });
+router.get("/logout", (request: HandlerRequest, response: HandlerResponse) => {
+  if (!request.headers) {
+    response.status(400);
+    return response.end();
+  }
 
-    const validation = loginUserSchema.validate(body);
-    if (!validation) return response.json({ error: "invalid body" });
+  const token: Undefined<string> = request.headers.authorization;
 
-    const user: Undefined<User> = database.findOne(USERS_COLLECTION, {
-      email: body.email,
-    });
+  if (!token) {
+    response.status(400);
+    return response.end();
+  }
 
-    if (!user) return response.json({ error: "invalid credentials" });
+  const session: Undefined<Session> = database.findOne<Session>(
+    SESSIONS_COLLECTION,
+    { token },
+  );
 
-    const keyBuffer: Buffer = scryptSync(body.password, HASH_SALT, HASH_LENGTH);
-    const passwordBuffer: Buffer = Buffer.from(user.password, HASH_ENCODING);
+  if (!session) return response.end();
 
-    const passwordMatch: boolean = timingSafeEqual(keyBuffer, passwordBuffer);
+  database.deleteOne(SESSIONS_COLLECTION, session);
+});
 
-    if (!passwordMatch) return response.json({ error: "invalid credentials" });
-  },
-);
+router.post("/login", (request: HandlerRequest, response: HandlerResponse) => {
+  const body: LoginUser = request.body;
+  const loginUserSchema = validator.object({
+    email: validator.string().email().required(),
+    password: validator.string().min(8).required(),
+  });
+
+  const validation = loginUserSchema.validate(body);
+  if (!validation) return response.json({ error: "invalid body" });
+
+  const user: Undefined<User> = database.findOne(USERS_COLLECTION, {
+    email: body.email,
+  });
+
+  if (!user) return response.json({ error: "invalid credentials" });
+
+  const keyBuffer: Buffer = scryptSync(body.password, HASH_SALT, HASH_LENGTH);
+  const passwordBuffer: Buffer = Buffer.from(user.password, HASH_ENCODING);
+
+  const passwordMatch: boolean = timingSafeEqual(keyBuffer, passwordBuffer);
+
+  if (!passwordMatch) return response.json({ error: "invalid credentials" });
+
+  const session: Session = {
+    created: new Date().getTime(),
+    email: user.email,
+    token: randomUUID(),
+  };
+
+  database.insertOne(SESSIONS_COLLECTION, session);
+
+  response.json(session);
+});
 
 router.post(
   "/register",

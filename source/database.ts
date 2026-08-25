@@ -54,6 +54,13 @@ export class Database {
     this.writeDatabaseCollection(collectionName);
   }
 
+  deleteOne<T extends Object>(collectionName: string, document: T) {
+    if (!this.store[collectionName]) this.store[collectionName] = [];
+    const index: number = findIndexBy(this.store[collectionName], document);
+    if (index > -1) this.store[collectionName].splice(index, 1);
+    this.writeDatabaseCollection(collectionName);
+  }
+
   findOne<T>(collectionName: string, search: Object): Undefined<T> {
     if (!this.store[collectionName]) this.store[collectionName] = [];
     return findBy(this.store[collectionName], search) as Undefined<T>;
@@ -69,6 +76,14 @@ function findBy<T extends object>(
   search: Partial<T>,
 ): Undefined<T> {
   return items.find((obj) =>
+    Object.entries(search).every(
+      ([key, value]) => obj[key as keyof T] === value,
+    ),
+  );
+}
+
+function findIndexBy<T extends object>(items: T[], search: Partial<T>): number {
+  return items.findIndex((obj) =>
     Object.entries(search).every(
       ([key, value]) => obj[key as keyof T] === value,
     ),

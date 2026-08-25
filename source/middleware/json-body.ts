@@ -5,6 +5,8 @@ export const jsonBody = (
   response: HandlerResponse,
   next: () => void,
 ) => {
+  if (!request.body) return next();
+
   try {
     request.body = JSON.parse(request.body);
     next();

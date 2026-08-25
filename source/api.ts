@@ -51,6 +51,7 @@ export class Api {
 
     const handlerRequest: HandlerRequest = {
       ...request,
+      headers: request.headers,
       body,
     };
 
