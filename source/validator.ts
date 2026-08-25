@@ -38,6 +38,10 @@ export class Validator {
       if (data.length > this.rules.max) return false;
     }
 
+    if (this.rules.email) {
+      if (!data.includes("@")) return false;
+    }
+
     return true;
   }
 
@@ -86,6 +90,11 @@ export class Validator {
 
   max(length: number) {
     this.rules.max = length;
+    return this;
+  }
+
+  email() {
+    this.rules.email = true;
     return this;
   }
 
