@@ -1,7 +1,7 @@
 {
   "name": "repa",
   "version": "1.0.0",
-  "description": "Attendance writedown system",
+  "description": "Attendance write down system",
   "license": "MIT",
   "author": "Milan Koyš",
   "type": "module",
