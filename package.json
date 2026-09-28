@@ -1,0 +1,20 @@
+{
+  "name": "repa",
+  "version": "1.0.0",
+  "description": "Attendance writedown system",
+  "license": "MIT",
+  "author": "Milan Koyš",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node build/index.js",
+    "build": "tsc --watch --preserveWatchOutput",
+    "watch": "nodemon --watch build build/index.js",
+    "dev": "npm run build & npm run watch"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "nodemon": "^3.1.14",
+    "typescript": "^7.0.2"
+  }
+}
