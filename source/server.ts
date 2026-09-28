@@ -1,18 +1,22 @@
 import type {
-  Server as HttpServer,
   IncomingMessage,
-  ServerResponse,
+  Server as HttpServer,
+  ServerResponse as OutgoingMessage,
 } from "http";
 import type {
   Route,
   RouteMap,
   RouteStack,
+  ServerRequest,
+  ServerResponse,
   Undefined,
   VoidMethod,
 } from "@types";
 
 import { createServer as createHttpServer } from "http";
-import { Method } from "#enums";
+import { IncomingMessageEvent, Method } from "#enums";
+
+const EMPTY_STRING: string = "";
 
 export class Server {
   private readonly server: HttpServer = this.createServer();
@@ -44,11 +48,44 @@ export class Server {
     this.routeMap[method][path] = routes;
   }
 
-  private requestHandler(request: IncomingMessage, response: ServerResponse) {
-    const path: Undefined<string> = request.url;
-    const method: Undefined<Method> = request.method as Method;
+  private createResponse(outgoingMessage: OutgoingMessage): ServerResponse {
+    return { outgoingMessage };
+  }
 
-    if (!method || !path) return response.end();
+  private createRequest(
+    incomingMessage: IncomingMessage,
+    body: Undefined<string>,
+  ): ServerRequest {
+    return { incomingMessage, body };
+  }
+
+  private async buildBody(request: IncomingMessage): Promise<string> {
+    return new Promise<string>((resolve) => {
+      const blob: string[] = [];
+
+      const resolveBlob: VoidMethod = () => {
+        if (!blob.length) return resolve(EMPTY_STRING);
+        resolve(blob.toString());
+      };
+
+      request.on(IncomingMessageEvent.Data, (chunk) => blob.push(chunk));
+      request.on(IncomingMessageEvent.End, () => resolveBlob());
+    });
+  }
+
+  private async requestHandler(
+    incomingMessage: IncomingMessage,
+    outgoingMessage: OutgoingMessage,
+  ) {
+    const path: Undefined<string> = incomingMessage.url;
+    const method: Undefined<Method> = incomingMessage.method as Method;
+
+    if (!method || !path) return outgoingMessage.end();
+
+    const body: Undefined<string> = await this.buildBody(incomingMessage);
+
+    const request: ServerRequest = this.createRequest(incomingMessage, body);
+    const response: ServerResponse = this.createResponse(outgoingMessage);
 
     const routeStack: RouteStack = this.getHandlers(method, path);
     const stack: RouteStack = [...this.middlewareStack, ...routeStack];
