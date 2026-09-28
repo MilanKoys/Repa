@@ -7,10 +7,18 @@ import type {
 } from "@types";
 import { Server } from "./server.js";
 import { Method } from "#enums";
+import { jsonBody } from "#middleware";
+import { authRouter } from "#api";
+import { Database } from "./database.js";
 
 const PORT: number = 4200;
 const LISTEN_MESSAGE: string = `Running on http://localhost:${PORT}`;
 const LISTEN_CALLBACK: VoidMethod = () => console.log(LISTEN_MESSAGE);
+
+const MONGODB_URI: string = "mongodb://127.0.0.1:27017/";
+const DATABASE_NAME: string = "repa";
+const CONNECTED_MESSAGE: string = `Connected to database ${DATABASE_NAME} on ${MONGODB_URI}`;
+const CONNECTED_CALLBACK: VoidMethod = () => console.log(CONNECTED_MESSAGE);
 
 const middleware: Route = (
   request: ServerRequest,
@@ -42,14 +50,21 @@ const PongHandler: Route = (
   response.outgoingMessage.end();
 };
 
+const database: Database = Database.init();
+
+database.connect(MONGODB_URI, DATABASE_NAME, CONNECTED_CALLBACK);
+
 const router = new Server();
 
 router.route(Method.Get, PingPath, PongHandler);
 
 const server: Server = new Server();
 
+server.use(jsonBody);
 server.use(middleware);
 server.join(router);
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
+
+server.join(authRouter);
 
 server.listen(PORT, LISTEN_CALLBACK);

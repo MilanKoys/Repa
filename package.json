@@ -7,7 +7,11 @@
   "type": "module",
   "main": "index.js",
   "imports": {
-    "#enums": "./build/enums/index.js"
+    "#enums": "./build/enums/index.js",
+    "#api": "./build/api/index.js",
+    "#middleware": "./build/middleware/index.js",
+    "#server": "./build/server.js",
+    "#validator": "./build/validator.js"
   },
   "scripts": {
     "start": "node build/index.js",
@@ -19,5 +23,8 @@
     "@types/node": "^26.6.3",
     "nodemon": "^3.1.14",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "mongodb": "^7.7.0"
   }
 }

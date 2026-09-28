@@ -7,6 +7,10 @@
     "paths": {
       "@types": ["./source/types/index.ts"],
       "#enums": ["./source/enums/index.ts"],
+      "#api": ["./source/api/index.ts"],
+      "#middleware": ["./source/middleware/index.ts"],
+      "#server": ["./source/server.ts"],
+      "#validator": ["./source/validator.ts"],
     },
 
     // Environment Settings

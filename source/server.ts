@@ -6,6 +6,7 @@ import type {
 import type {
   ItterateRouteMapCallback,
   Or,
+  RequestBody,
   Route,
   RouteMap,
   RouteStack,
@@ -53,22 +54,29 @@ export class Server {
   }
 
   private createResponse(outgoingMessage: OutgoingMessage): ServerResponse {
-    return { outgoingMessage };
+    return {
+      outgoingMessage,
+      json: (object: Object) => {
+        outgoingMessage.setHeader("Content-Type", "application/json");
+        outgoingMessage.write(JSON.stringify(object));
+        outgoingMessage.end();
+      },
+    };
   }
 
   private createRequest(
     incomingMessage: IncomingMessage,
-    body: Undefined<string>,
+    body: unknown,
   ): ServerRequest {
     return { incomingMessage, body };
   }
 
-  private async buildBody(request: IncomingMessage): Promise<string> {
-    return new Promise<string>((resolve) => {
+  private async buildBody(request: IncomingMessage): Promise<RequestBody> {
+    return new Promise<RequestBody>((resolve) => {
       const blob: string[] = [];
 
       const resolveBlob: VoidMethod = () => {
-        if (!blob.length) return resolve(EMPTY_STRING);
+        if (!blob.length) return resolve(undefined);
         resolve(blob.toString());
       };
 
@@ -151,5 +159,9 @@ export class Server {
 
   public listen(port: number, callback?: VoidMethod) {
     this.server.listen(port, callback);
+  }
+
+  public close(callback?: () => void) {
+    this.server.close(callback);
   }
 }
