@@ -10,6 +10,7 @@
       "#api": ["./source/api/index.ts"],
       "#middleware": ["./source/middleware/index.ts"],
       "#server": ["./source/server.ts"],
+      "#database": ["./source/database.ts"],
       "#validator": ["./source/validator.ts"],
     },
 

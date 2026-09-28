@@ -11,6 +11,7 @@
     "#api": "./build/api/index.js",
     "#middleware": "./build/middleware/index.js",
     "#server": "./build/server.js",
+    "#database": "./build/database.js",
     "#validator": "./build/validator.js"
   },
   "scripts": {

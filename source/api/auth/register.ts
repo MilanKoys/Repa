@@ -1,12 +1,12 @@
 import type { CreateUser, ServerRequest, ServerResponse, User } from "@types";
+import type { Collection } from "mongodb";
 
 import { scryptSync } from "node:crypto";
 
 import { Server } from "#server";
 import { Method } from "#enums";
 import { Validator } from "#validator";
-import { Database } from "../../database.js";
-import type { Collection } from "mongodb";
+import { Database } from "#database";
 
 const USERS_COLLECTION: string = "users";
 const SALT_LENGTH: number = 32;

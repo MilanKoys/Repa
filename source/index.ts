@@ -5,11 +5,11 @@ import type {
   Undefined,
   VoidMethod,
 } from "@types";
-import { Server } from "./server.js";
+import { Server } from "#server";
 import { Method } from "#enums";
 import { jsonBody } from "#middleware";
 import { authRouter } from "#api";
-import { Database } from "./database.js";
+import { Database } from "#database";
 
 const PORT: number = 4200;
 const LISTEN_MESSAGE: string = `Running on http://localhost:${PORT}`;
