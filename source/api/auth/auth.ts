@@ -1,4 +1,3 @@
-import { Method } from "#enums";
 import { Server } from "#server";
 
 import registerRouter from "./register.js";
