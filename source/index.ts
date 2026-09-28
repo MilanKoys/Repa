@@ -33,9 +33,23 @@ const HelloWorldHandler: Route = (
   response.outgoingMessage.end();
 };
 
+const PingPath = "/ping";
+const PongHandler: Route = (
+  _request: ServerRequest,
+  response: ServerResponse,
+) => {
+  response.outgoingMessage.write("pong");
+  response.outgoingMessage.end();
+};
+
+const router = new Server();
+
+router.route(Method.Get, PingPath, PongHandler);
+
 const server: Server = new Server();
 
 server.use(middleware);
+server.join(router);
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
 
 server.listen(PORT, LISTEN_CALLBACK);

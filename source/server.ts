@@ -4,6 +4,8 @@ import type {
   ServerResponse as OutgoingMessage,
 } from "http";
 import type {
+  ItterateRouteMapCallback,
+  Or,
   Route,
   RouteMap,
   RouteStack,
@@ -13,10 +15,12 @@ import type {
   VoidMethod,
 } from "@types";
 
+import { join } from "path";
 import { createServer as createHttpServer } from "http";
 import { IncomingMessageEvent, Method } from "#enums";
 
 const EMPTY_STRING: string = "";
+const FIRST_INDEX: number = 0;
 
 export class Server {
   private readonly server: HttpServer = this.createServer();
@@ -90,7 +94,7 @@ export class Server {
     const routeStack: RouteStack = this.getHandlers(method, path);
     const stack: RouteStack = [...this.middlewareStack, ...routeStack];
 
-    let stackPointer: number = 0;
+    let stackPointer: number = FIRST_INDEX;
 
     const next = () => {
       const handler: Undefined<Route> = stack[stackPointer];
@@ -99,6 +103,36 @@ export class Server {
     };
 
     next();
+  }
+
+  private itterateRouteMap(callback: ItterateRouteMapCallback) {
+    Object.values(Method).forEach((method: Method) => {
+      Object.keys(this.routeMap[method]).forEach((path: string) => {
+        callback(method, path);
+      });
+    });
+  }
+
+  private importServer(server: Server, importPath?: string) {
+    this.use(...server.middlewareStack);
+    server.itterateRouteMap((method: Method, path: string) => {
+      const joinedPath: string = join(importPath ?? EMPTY_STRING, path);
+      const handlers: RouteStack = server.getHandlers(method, path);
+
+      if (handlers.length) {
+        this.pushHandlers(method, joinedPath, server.getHandlers(method, path));
+      }
+    });
+  }
+
+  public join(pathOrServer: Or<Server, string>, ...servers: Server[]) {
+    if (pathOrServer instanceof Server === false) {
+      for (const server of servers) {
+        this.importServer(server, pathOrServer);
+      }
+    } else {
+      this.importServer(pathOrServer);
+    }
   }
 
   public use(...handlers: RouteStack) {
