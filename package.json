@@ -6,6 +6,9 @@
   "author": "Milan Koyš",
   "type": "module",
   "main": "index.js",
+  "imports": {
+    "#enums": "./build/enums/index.js"
+  },
   "scripts": {
     "start": "node build/index.js",
     "build": "tsc --watch --preserveWatchOutput",

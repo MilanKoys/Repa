@@ -6,6 +6,7 @@
     "outDir": "./build",
     "paths": {
       "@types": ["./source/types/index.ts"],
+      "#enums": ["./source/enums/index.ts"],
     },
 
     // Environment Settings
