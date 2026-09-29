@@ -45,8 +45,8 @@ const server: Server = new Server();
 server.use(logger);
 server.use(jsonBody);
 server.join(authRouter);
-server.use(dynamicServe("pages"));
-server.use(dynamicServe("build/public"));
+server.use(dynamicServe("web/pages"));
+server.use(dynamicServe("web/code"));
 
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
 server.join(router);

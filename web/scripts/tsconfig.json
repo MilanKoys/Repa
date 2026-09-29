@@ -4,7 +4,7 @@
   "compilerOptions": {
     // File Layout
     "rootDir": ".",
-    "outDir": "../../build/public",
+    "outDir": "../code",
     "paths": {},
 
     // Environment Settings
