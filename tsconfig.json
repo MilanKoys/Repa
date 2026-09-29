@@ -1,5 +1,8 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
+  "include": ["source"],
+  "exclude": ["source/public"],
+  "references": [{ "path": "./source/public" }],
   "compilerOptions": {
     // File Layout
     "rootDir": "./source",

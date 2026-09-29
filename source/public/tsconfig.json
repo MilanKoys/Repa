@@ -1,0 +1,21 @@
+{
+  // Browser scripts, served from build/public
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // File Layout
+    "rootDir": ".",
+    "outDir": "../../build/public",
+    "paths": {},
+
+    // Environment Settings
+    // For browser:
+    "lib": ["esnext", "dom"],
+    "types": [],
+
+    // Other Outputs
+    "composite": true,
+    "tsBuildInfoFile": "../../build/public.tsbuildinfo",
+  },
+  "include": ["./**/*.ts"],
+  "exclude": [],
+}

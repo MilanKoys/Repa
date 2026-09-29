@@ -46,6 +46,7 @@ server.use(logger);
 server.use(jsonBody);
 server.join(authRouter);
 server.use(dynamicServe("pages"));
+server.use(dynamicServe("build/public"));
 
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
 server.join(router);
