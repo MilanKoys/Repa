@@ -14,6 +14,9 @@ const DATABASE_NAME: string = "repa";
 const CONNECTED_MESSAGE: string = `Connected to database ${DATABASE_NAME} on ${MONGODB_URI}`;
 const CONNECTED_CALLBACK: VoidMethod = () => console.log(CONNECTED_MESSAGE);
 
+const WEB_PAGES_PATH: string = "web/pages";
+const WEB_CODE_PATH: string = "web/code";
+
 const HelloWordPath: string = "/";
 const HelloWorldHandler: Route = (
   request: ServerRequest,
@@ -45,8 +48,8 @@ const server: Server = new Server();
 server.use(logger);
 server.use(jsonBody);
 server.join(authRouter);
-server.use(dynamicServe("web/pages"));
-server.use(dynamicServe("web/code"));
+server.use(dynamicServe(WEB_PAGES_PATH));
+server.use(dynamicServe(WEB_CODE_PATH));
 
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
 server.join(router);
