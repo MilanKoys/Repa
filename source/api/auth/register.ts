@@ -1,6 +1,5 @@
 import type {
   KeyPairExportOptions,
-  KeyPairExportResult,
   PrivateKeyExportOptions,
   PublicKeyExportOptions,
 } from "crypto";
