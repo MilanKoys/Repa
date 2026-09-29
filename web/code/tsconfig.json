@@ -3,8 +3,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     // File Layout
-    "rootDir": ".",
-    "outDir": "../code",
+    "rootDir": "../code",
+    "outDir": "../distribution",
     "paths": {},
 
     // Environment Settings
@@ -16,6 +16,6 @@
     "composite": true,
     "tsBuildInfoFile": "../../build/public.tsbuildinfo",
   },
-  "include": ["./**/*.ts"],
+  "include": ["../code/**/*.ts"],
   "exclude": [],
 }

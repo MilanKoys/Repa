@@ -21,12 +21,15 @@ const CONNECTED_MESSAGE: string = `Connected to database ${DATABASE_NAME} on ${M
 const CONNECTED_CALLBACK: VoidMethod = () => console.log(CONNECTED_MESSAGE);
 
 const WEB_PAGES_PATH: string = "web/pages";
-const WEB_CODE_PATH: string = "web/code";
+const WEB_DISTRIBUTION_PATH: string = "web/distribution";
 const WEB_STYLES_PATH: string = "web/styles";
+const WEB_CODE_PATH: string = "web/code";
 
 const DEFAULT_SERVE_EXTENSION: string = ".html";
+const ROOT_FILE_PATH: string = "index.html";
 const SERVE_OPTIONS: DynamicServeOptions = {
   appendExtension: DEFAULT_SERVE_EXTENSION,
+  rootFilePath: ROOT_FILE_PATH,
 };
 
 const HelloWordPath: string = "/";
@@ -61,8 +64,9 @@ server.use(logger);
 server.use(jsonBody);
 server.join(authRouter);
 server.use(dynamicServe(WEB_PAGES_PATH, SERVE_OPTIONS));
-server.use(dynamicServe(WEB_CODE_PATH));
+server.use(dynamicServe(WEB_DISTRIBUTION_PATH));
 server.use(dynamicServe(WEB_STYLES_PATH));
+server.use(dynamicServe(WEB_CODE_PATH));
 
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
 server.join(router);

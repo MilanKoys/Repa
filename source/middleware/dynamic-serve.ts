@@ -36,7 +36,9 @@ export function dynamicServe(
   ) => {
     let url: string = request.incomingMessage.url ?? FALLBACK_URL;
 
-    if (options && options.appendExtension) {
+    if (options && options.rootFilePath && url === FALLBACK_URL) {
+      url += options.rootFilePath;
+    } else if (options && options.appendExtension) {
       url += options.appendExtension;
     }
 
