@@ -1,4 +1,10 @@
-import type { Route, ServerRequest, ServerResponse, VoidMethod } from "@types";
+import type {
+  DynamicServeOptions,
+  Route,
+  ServerRequest,
+  ServerResponse,
+  VoidMethod,
+} from "@types";
 
 import { join, extname } from "path";
 import { readFile } from "fs";
@@ -17,7 +23,10 @@ const MIME_TYPE_MAP: Record<string, string> = {
   ".js": "text/javascript",
 };
 
-export function dynamicServe(path: string): Route {
+export function dynamicServe(
+  path: string,
+  options?: DynamicServeOptions,
+): Route {
   const mainPath: string = join(ROOT_FILE_PATH, path);
 
   return (
@@ -25,7 +34,12 @@ export function dynamicServe(path: string): Route {
     response: ServerResponse,
     next: VoidMethod,
   ) => {
-    const url: string = request.incomingMessage.url ?? FALLBACK_URL;
+    let url: string = request.incomingMessage.url ?? FALLBACK_URL;
+
+    if (options && options.appendExtension) {
+      url += options.appendExtension;
+    }
+
     const requestedPath: string = join(mainPath, url);
     readFile(requestedPath, { encoding: FILE_ENCODING }, (error, file) => {
       if (error) return next();

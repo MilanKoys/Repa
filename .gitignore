@@ -1,4 +1,5 @@
 node_modules/
 build/
 web/code/
+web/styles/styles.css
 tsconfig.tsbuildinfo

@@ -1,4 +1,10 @@
-import type { Route, ServerRequest, ServerResponse, VoidMethod } from "@types";
+import type {
+  DynamicServeOptions,
+  Route,
+  ServerRequest,
+  ServerResponse,
+  VoidMethod,
+} from "@types";
 import { Server } from "#server";
 import { Method } from "#enums";
 import { dynamicServe, jsonBody, logger } from "#middleware";
@@ -16,6 +22,12 @@ const CONNECTED_CALLBACK: VoidMethod = () => console.log(CONNECTED_MESSAGE);
 
 const WEB_PAGES_PATH: string = "web/pages";
 const WEB_CODE_PATH: string = "web/code";
+const WEB_STYLES_PATH: string = "web/styles";
+
+const DEFAULT_SERVE_EXTENSION: string = ".html";
+const SERVE_OPTIONS: DynamicServeOptions = {
+  appendExtension: DEFAULT_SERVE_EXTENSION,
+};
 
 const HelloWordPath: string = "/";
 const HelloWorldHandler: Route = (
@@ -48,8 +60,9 @@ const server: Server = new Server();
 server.use(logger);
 server.use(jsonBody);
 server.join(authRouter);
-server.use(dynamicServe(WEB_PAGES_PATH));
+server.use(dynamicServe(WEB_PAGES_PATH, SERVE_OPTIONS));
 server.use(dynamicServe(WEB_CODE_PATH));
+server.use(dynamicServe(WEB_STYLES_PATH));
 
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
 server.join(router);
