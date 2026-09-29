@@ -1,7 +1,7 @@
 import { Shape, TypeOf } from "#enums";
-import type { ValidationRules, Undefined, KeyObject } from "@types";
+import type { ValidationRules, Undefined, ObjectKey } from "@types";
 
-type Schema = KeyObject<Validator>;
+type Schema = ObjectKey<Validator>;
 
 export class Validator {
   schema: Undefined<Schema>;
@@ -45,7 +45,7 @@ export class Validator {
     return true;
   }
 
-  private validateKey(schema: Schema, data: KeyObject<unknown>, key: string) {
+  private validateKey(schema: Schema, data: ObjectKey<unknown>, key: string) {
     const schemaValidator: Undefined<Validator> = schema[key];
     const dataShape: Undefined<unknown> = data[key];
 
@@ -56,7 +56,7 @@ export class Validator {
     return Object.keys(data).includes(key);
   }
 
-  private validateObject(data: KeyObject<unknown>) {
+  private validateObject(data: ObjectKey<unknown>) {
     const schema = this.schema;
     if (!schema) return false;
 

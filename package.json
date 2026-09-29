@@ -12,7 +12,8 @@
     "#middleware": "./build/middleware/index.js",
     "#server": "./build/server.js",
     "#database": "./build/database.js",
-    "#validator": "./build/validator.js"
+    "#validator": "./build/validator.js",
+    "#session": "./build/session.js"
   },
   "scripts": {
     "start": "node build/index.js",

@@ -10,8 +10,10 @@ export * from "./or.js";
 
 export * from "./validation-rules.js";
 
-export * from "./key-object.js";
+export * from "./object-key.js";
 
 export * from "./request-body.js";
 
 export * from "./user.js";
+
+export * from "./token.js";

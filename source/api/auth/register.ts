@@ -1,21 +1,53 @@
-import type { CreateUser, ServerRequest, ServerResponse, User } from "@types";
+import type {
+  KeyPairExportOptions,
+  KeyPairExportResult,
+  PrivateKeyExportOptions,
+  PublicKeyExportOptions,
+} from "crypto";
 import type { Collection } from "mongodb";
 
-import { scryptSync } from "node:crypto";
+import type {
+  UserBase,
+  ServerRequest,
+  ServerResponse,
+  User,
+  UserSessionKeys,
+} from "@types";
+
+import { generateKeyPairSync, scryptSync } from "crypto";
 
 import { Server } from "#server";
-import { Method } from "#enums";
+import { CollectionName, Method } from "#enums";
 import { Validator } from "#validator";
 import { Database } from "#database";
 
-const USERS_COLLECTION: string = "users";
 const SALT_LENGTH: number = 32;
 const HASH_LENGTH: number = 64;
 const SALT: Uint8Array = new Uint8Array(SALT_LENGTH);
 const HASH_ENCODING: "hex" = "hex";
+const KEY_PAIR_ALGORITHM: "ed25519" = "ed25519";
+
+const PUBLIC_KEY_ENCODING: PublicKeyExportOptions<"spki"> = {
+  type: "spki",
+  format: "pem",
+};
+
+const PRIVATE_KEY_ENCODING: PrivateKeyExportOptions<"pkcs8"> = {
+  type: "pkcs8",
+  format: "pem",
+};
+
+const KEY_PAIR_OPTIONS: KeyPairExportOptions<"spki", "pkcs8"> = {
+  privateKeyEncoding: PRIVATE_KEY_ENCODING,
+  publicKeyEncoding: PUBLIC_KEY_ENCODING,
+};
 
 function hashPassword(password: string) {
   return scryptSync(password, SALT, HASH_LENGTH).toString(HASH_ENCODING);
+}
+
+function generateKeys(): UserSessionKeys {
+  return generateKeyPairSync(KEY_PAIR_ALGORITHM, KEY_PAIR_OPTIONS);
 }
 
 const validator: Validator = new Validator();
@@ -25,25 +57,25 @@ const registerSchema: Validator = validator.object({
   password: validator.string().required().min(8),
 });
 
-const registerRouter: Server = new Server();
-
 const database: Database = Database.init();
+
+const registerRouter: Server = new Server();
 
 const registerPath = "/register";
 const registerHandler = async (
   request: ServerRequest,
   response: ServerResponse,
 ) => {
-  const body: CreateUser = request.body as CreateUser;
+  const body: UserBase = request.body as UserBase;
 
   const valid: boolean = registerSchema.validate(body);
 
   if (!valid) {
     response.outgoingMessage.statusCode = 400;
-    response.outgoingMessage.end();
+    return response.outgoingMessage.end();
   }
 
-  const users: Collection<User> = database.collection(USERS_COLLECTION);
+  const users: Collection<User> = database.collection(CollectionName.Users);
 
   const foundUser = await users.findOne({ email: body.email });
 
@@ -56,6 +88,7 @@ const registerHandler = async (
 
   await users.insertOne({
     ...body,
+    session: generateKeys(),
     password: hash,
     created: new Date().getTime(),
   });
