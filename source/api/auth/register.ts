@@ -26,6 +26,7 @@ const HASH_LENGTH: number = 64;
 const SALT: Uint8Array = new Uint8Array(SALT_LENGTH);
 const HASH_ENCODING: "hex" = "hex";
 const KEY_PAIR_ALGORITHM: "ed25519" = "ed25519";
+const KEY_PAIR_ENCODING: BufferEncoding = "base64";
 
 const PUBLIC_KEY_ENCODING: PublicKeyExportOptions<"spki"> = {
   type: "spki",
@@ -46,8 +47,16 @@ function hashPassword(password: string) {
   return scryptSync(password, SALT, HASH_LENGTH).toString(HASH_ENCODING);
 }
 
-function generateKeys(): UserSessionKeys {
-  return generateKeyPairSync(KEY_PAIR_ALGORITHM, KEY_PAIR_OPTIONS);
+function generateKeys(encoding: BufferEncoding): UserSessionKeys {
+  const keyPair: UserSessionKeys = generateKeyPairSync(
+    KEY_PAIR_ALGORITHM,
+    KEY_PAIR_OPTIONS,
+  );
+
+  keyPair.privateKey = Buffer.from(keyPair.privateKey).toString(encoding);
+  keyPair.publicKey = Buffer.from(keyPair.publicKey).toString(encoding);
+
+  return keyPair;
 }
 
 const validator: Validator = new Validator();
@@ -88,7 +97,7 @@ const registerHandler = async (
 
   await users.insertOne({
     ...body,
-    session: generateKeys(),
+    session: generateKeys(KEY_PAIR_ENCODING),
     password: hash,
     created: new Date().getTime(),
   });

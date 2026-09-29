@@ -4,6 +4,12 @@ import { sign, verify } from "crypto";
 
 const SIGNATURE_ALGORITHM: null = null;
 const SIGNATURE_ENCODING: "hex" = "hex";
+const KEY_PAIR_ENCODING: BufferEncoding = "base64";
+const KEY_PAIR_DECODING: BufferEncoding = "utf-8";
+
+function decodeKey(key: string) {
+  return Buffer.from(key, KEY_PAIR_ENCODING).toString(KEY_PAIR_DECODING);
+}
 
 export class Session {
   private static instance: Undefined<Session>;
@@ -11,7 +17,11 @@ export class Session {
   private constructor() {}
 
   private signData(data: string, privateKey: string) {
-    const signedBuffer: Buffer = sign(SIGNATURE_ALGORITHM, data, privateKey);
+    const signedBuffer: Buffer = sign(
+      SIGNATURE_ALGORITHM,
+      data,
+      decodeKey(privateKey),
+    );
 
     return signedBuffer.toString(SIGNATURE_ENCODING);
   }
@@ -40,7 +50,7 @@ export class Session {
     return verify(
       SIGNATURE_ALGORITHM,
       signatureData,
-      user.session.publicKey,
+      decodeKey(user.session.publicKey),
       Buffer.from(token.signature, SIGNATURE_ENCODING),
     );
   }
