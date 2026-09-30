@@ -20,7 +20,7 @@
     "start": "node build/index.js",
     "dev": "npm run styles:watch | npm run compile:watch & npm run code:watch ",
     "build": "npm run styles:build | npm run compile:build",
-    "code:watch": "nodemon -e js,html --watch web --watch build build/index.js",
+    "code:watch": "nodemon -e js,html,css --watch web --watch build build/index.js",
     "compile:watch": "tsc --build --watch --preserveWatchOutput",
     "compile:build": "tsc --build",
     "styles:watch": "npx @tailwindcss/cli -i ./web/styles/input.css -o ./web/styles/styles.css --watch",

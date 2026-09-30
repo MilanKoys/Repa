@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/styles.css" />
+        <script src="/main.js" type="module" defer></script>
+        <script src="/views/login.js" type="module" defer></script>
+        <title>Repa - Login</title>
+    </head>
+    <body>
+        <div class="bg-black h-svh w-svw flex overflow-auto">
+            <div
+                class="flex-1 lg:flex bg-blue-950/70 flex-col justify-between hidden"
+            >
+                <div
+                    class="flex w-full h-full relative overflow-hidden flex-col justify-between"
+                >
+                    <div
+                        class="h-130 aspect-square rounded-full bg-indigo-900/60 -top-40 -right-40 absolute"
+                    ></div>
+                    <div
+                        class="w-sm aspect-square rounded-full bg-indigo-600/40 -bottom-50 -left-40 absolute"
+                    ></div>
+                </div>
+            </div>
+            <div
+                class="flex-1 flex bg-slate-50 z-10 flex-col items-center justify-center"
+            >
+                <div class="flex flex-col gap-8.5">
+                    <div class="flex lg:hidden gap-2.5 items-center">
+                        <div
+                            class="size-4 bg-indigo-600 rounded-lg p-4 flex items-center justify-center"
+                        >
+                            <p class="font-bold text-white">R</p>
+                        </div>
+                        <p class="font-semibold text-lg">Repa</p>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <p class="text-3xl text-slate-900 font-bold">
+                            Sign in to Repa
+                        </p>
+                        <p class="text-slate-500 text-sm">
+                            Don't have an account? Contact your school
+                            administrator.
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-5">
+                        <input-text-component
+                            label="Email address"
+                            placeholder="email@telekom.com"
+                            type="email"
+                        ></input-text-component>
+                        <input-text-component
+                            link="Forgot password?"
+                            href="#"
+                            label="Password"
+                            type="password"
+                            placeholder="•••••••••••"
+                        ></input-text-component>
+                        <div class="flex gap-2 items-center">
+                            <input
+                                type="checkbox"
+                                class="accent-indigo-600 size-4"
+                            />
+                            <p class="text-sm text-slate-600">
+                                Keep me signed in
+                            </p>
+                        </div>
+                        <button
+                            class="text-sm font-semibold p-2.5 text-white rounded-lg bg-indigo-600 hover:bg-indigo-800 cursor-pointer"
+                        >
+                            Sign in
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

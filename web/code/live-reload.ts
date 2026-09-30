@@ -1,4 +1,4 @@
-const LIVE_RELOAD_DEFAULT_DELAY: number = 100;
+const LIVE_RELOAD_DEFAULT_DELAY: number = 1000;
 
 export function liveReload(
   uri: string,
