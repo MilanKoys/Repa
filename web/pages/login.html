@@ -11,10 +11,10 @@
     <body>
         <div class="bg-black h-svh w-svw flex overflow-auto">
             <div
-                class="flex-1 lg:flex bg-blue-950/70 flex-col justify-between hidden"
+                class="flex-1 lg:flex bg-blue-950/70 flex-col justify-between hidden relative"
             >
                 <div
-                    class="flex w-full h-full relative overflow-hidden flex-col justify-between"
+                    class="flex w-full h-full overflow-hidden flex-col justify-between absolute"
                 >
                     <div
                         class="h-130 aspect-square rounded-full bg-indigo-900/60 -top-40 -right-40 absolute"
@@ -23,11 +23,32 @@
                         class="w-sm aspect-square rounded-full bg-indigo-600/40 -bottom-50 -left-40 absolute"
                     ></div>
                 </div>
+
+                <div class="flex flex-col justify-between z-10 m-10 h-full">
+                    <div class="flex gap-2.5 items-center">
+                        <div
+                            class="size-4 bg-indigo-600 rounded-lg p-4 flex items-center justify-center"
+                        >
+                            <p class="font-bold text-white">R</p>
+                        </div>
+                        <p class="font-semibold text-white text-lg">Repa</p>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <p class="text-white text-4xl font-semibold">
+                            Student attendance, recorded in seconds.
+                        </p>
+                        <p class="text-slate-400">
+                            Take the register, track absences and keep every
+                            class up to date.
+                        </p>
+                    </div>
+                </div>
             </div>
             <div
                 class="flex-1 flex bg-slate-50 z-10 flex-col items-center justify-center"
             >
-                <div class="flex flex-col gap-8.5">
+                <div class="flex flex-col gap-8.5 mx-10">
                     <div class="flex lg:hidden gap-2.5 items-center">
                         <div
                             class="size-4 bg-indigo-600 rounded-lg p-4 flex items-center justify-center"
