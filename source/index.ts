@@ -10,9 +10,14 @@ import { Method } from "#enums";
 import { dynamicServe, jsonBody, logger } from "#middleware";
 import { authRouter } from "#api";
 import { Database } from "#database";
+import { WebSocket as WebSocketServer } from "./websocket.js";
 
-const PORT: number = 4200;
-const LISTEN_MESSAGE: string = `Running on http://localhost:${PORT}`;
+const WS_PORT: number = 3000;
+const WS_LISTEN_MESSAGE: string = `Websocket on http://localhost:${WS_PORT}`;
+const WS_LISTEN_CALLBACK: VoidMethod = () => console.log(WS_LISTEN_MESSAGE);
+
+const SERVER_PORT: number = 4200;
+const LISTEN_MESSAGE: string = `Running on http://localhost:${SERVER_PORT}`;
 const LISTEN_CALLBACK: VoidMethod = () => console.log(LISTEN_MESSAGE);
 
 const MONGODB_URI: string = "mongodb://127.0.0.1:27017/";
@@ -59,8 +64,10 @@ const router = new Server();
 router.route(Method.Get, PingPath, PongHandler);
 
 const server: Server = new Server();
+const webSocketServer: WebSocketServer = new WebSocketServer();
 
-server.use(logger);
+webSocketServer.listen(WS_PORT, WS_LISTEN_CALLBACK);
+
 server.use(jsonBody);
 server.join(authRouter);
 server.use(dynamicServe(WEB_PAGES_PATH, SERVE_OPTIONS));
@@ -71,4 +78,4 @@ server.use(dynamicServe(WEB_CODE_PATH));
 server.route(Method.Get, HelloWordPath, HelloWorldHandler);
 server.join(router);
 
-server.listen(PORT, LISTEN_CALLBACK);
+server.listen(SERVER_PORT, LISTEN_CALLBACK);

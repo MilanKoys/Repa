@@ -13,6 +13,7 @@
       "#middleware": ["./source/middleware/index.ts"],
       "#server": ["./source/server.ts"],
       "#database": ["./source/database.ts"],
+      "#websocket": ["./source/websocket.ts"],
       "#session": ["./source/session.ts"],
       "#validator": ["./source/validator.ts"],
     },
