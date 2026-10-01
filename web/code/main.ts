@@ -1,3 +1,4 @@
+import { HeaderComponent } from "./components/header/header.js";
 import { InputTextComponent } from "./components/input-text/input-text.js";
 import { ShellComponent } from "./components/shell/shell.js";
 import { liveReload } from "./live-reload.js";
@@ -8,4 +9,5 @@ const WS_URI: string = `ws://localhost:${WS_PORT}`;
 liveReload(WS_URI);
 
 customElements.define("shell-component", ShellComponent);
+customElements.define("header-component", HeaderComponent);
 customElements.define("input-text-component", InputTextComponent);

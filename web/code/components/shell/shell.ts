@@ -3,27 +3,13 @@ import { AuthentificationService } from "../../services/authentification.js";
 
 const LOGIN_PAGE: string = "/login";
 
-const CLICK_EVENT: string = "click";
-
 export class ShellComponent extends Component {
   private authService = AuthentificationService.inject();
-
-  private logout: HTMLElement | null = null;
 
   constructor() {
     super();
     this.loadTemplate("/components/shell/shell.html");
     this.verifySession();
-  }
-
-  protected templateLoaded(): void {
-    this.logout = this.document.querySelector("#logout");
-
-    if (this.logout)
-      this.logout.addEventListener(CLICK_EVENT, async () => {
-        await this.authService.logout();
-        await this.verifySession();
-      });
   }
 
   async verifySession() {
