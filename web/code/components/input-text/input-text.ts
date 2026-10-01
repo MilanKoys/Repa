@@ -25,6 +25,7 @@ export class InputTextComponent extends Component {
   private label: HTMLElement | null = null;
   private input: HTMLInputElement | null = null;
   private link: HTMLElement | null = null;
+  private error: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -34,8 +35,23 @@ export class InputTextComponent extends Component {
     this.dispatchEvent(new CustomEvent(name, options));
   }
 
+  protected renderError(errorMessage: string) {
+    if (this.error) {
+      if (errorMessage.length) {
+        this.error.textContent = errorMessage;
+      } else {
+        this.error.textContent = null;
+      }
+    }
+  }
+
   private bindEvents() {
     if (this.input) {
+      this.input.addEventListener(CHANGE_EVENT, (event) => {
+        const target: HTMLInputElement = event.target as HTMLInputElement;
+        this.renderError(target.validationMessage);
+      });
+
       this.input.addEventListener(INPUT_EVENT, (event) => {
         const target: HTMLInputElement = event.target as HTMLInputElement;
 
@@ -50,6 +66,7 @@ export class InputTextComponent extends Component {
     this.label = this.document.querySelector("#label");
     this.input = this.document.querySelector("#input");
     this.link = this.document.querySelector("#link");
+    this.error = this.document.querySelector("#error");
 
     this.bindEvents();
   }
@@ -70,7 +87,10 @@ export class InputTextComponent extends Component {
         if (this.label) this.label.textContent = newValue;
         break;
       case INVALID_NAME:
-        if (this.input) this.input.setCustomValidity(newValue ?? EMPTY_STRING);
+        if (this.input && this.error) {
+          this.input.setCustomValidity(newValue ?? EMPTY_STRING);
+          this.error.textContent = this.input.validationMessage;
+        }
         break;
       case PLACEHOLDER_NAME:
         if (this.input) this.input.setAttribute(PLACEHOLDER_NAME, newValue);
