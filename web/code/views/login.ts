@@ -1,22 +1,27 @@
 import type { InputTextComponent } from "../components/input-text/input-text.js";
+import { AuthentificationService } from "../services/authentification.js";
 
 type InputTextSelector = null | InputTextComponent;
 type ButtonSelector = null | HTMLButtonElement;
+
+const SIGN_IN_REDIRECT: string = "/";
+
+const INVALID_ATTRIBUTE: string = "invalid";
+
+const CHANGE_EVENT: string = "change";
+const CLICK_EVENT: string = "click";
+
+const authService: AuthentificationService = AuthentificationService.inject();
+
+const session = await authService.loadSession();
+
+if (session) location.href = SIGN_IN_REDIRECT;
 
 const emailElement: InputTextSelector = document.querySelector("#email");
 const passwordElement: InputTextSelector = document.querySelector("#password");
 const submitElement: ButtonSelector = document.querySelector("#submit");
 const loadingElement: ButtonSelector = document.querySelector("#loading");
 const errorElement: ButtonSelector = document.querySelector("#error");
-
-const API_SIGN_IN_ENDPOINT: string = "/auth/login";
-const API_URL: string = "http://localhost:4200";
-const POST_METHOD: string = "POST";
-
-const INVALID_ATTRIBUTE: string = "invalid";
-
-const CHANGE_EVENT: string = "change";
-const CLICK_EVENT: string = "click";
 
 let email: string = "";
 let password: string = "";
@@ -87,13 +92,11 @@ if (submitElement) {
       return;
     }
 
-    fetch(`${API_URL}${API_SIGN_IN_ENDPOINT}`, {
-      method: POST_METHOD,
-      body: JSON.stringify({ email, password }),
-    })
-      .then((rawResponse) => rawResponse.json())
+    authService
+      .login(email, password)
       .then((response) => {
         toggleLoading(false);
+        location.href = SIGN_IN_REDIRECT;
       })
       .catch((error) => {
         if (error) {

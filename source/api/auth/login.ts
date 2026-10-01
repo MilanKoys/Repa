@@ -68,7 +68,12 @@ const loginHandler = async (
 
   const token: Token = session.createSession(foundUser);
 
-  response.json(token);
+  response.outgoingMessage.setHeader(
+    "Set-Cookie",
+    `session=${encodeURIComponent(JSON.stringify(token))}; Path=/`,
+  );
+
+  response.outgoingMessage.end();
 };
 
 loginRouter.route(Method.Post, loginPath, loginHandler);
