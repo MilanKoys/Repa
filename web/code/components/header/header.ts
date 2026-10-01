@@ -18,11 +18,12 @@ export class HeaderComponent extends Component {
   protected templateLoaded(): void {
     this.logout = this.document.querySelector("#logout");
 
-    if (this.logout)
+    if (this.logout) {
       this.logout.addEventListener(CLICK_EVENT, async () => {
         await this.authService.logout();
         await this.verifySession();
       });
+    }
   }
 
   async verifySession() {
