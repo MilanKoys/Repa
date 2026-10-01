@@ -15,13 +15,10 @@ const POST_METHOD: string = "POST";
 
 export class AuthentificationService {
   private static instance: Undefined<AuthentificationService>;
-  private sessionCookie: Promise<Nullable<CookieListItem>>;
 
   public session: Undefined<Session>;
 
-  private constructor() {
-    this.sessionCookie = this.loadSessionCookie();
-  }
+  private constructor() {}
 
   private async loadSessionCookie() {
     return new Promise<Nullable<CookieListItem>>(async (resolve) => {
@@ -51,9 +48,7 @@ export class AuthentificationService {
   }
 
   public async loadSession() {
-    if (this.session) return this.session;
-
-    const sessionCookie = await this.sessionCookie;
+    const sessionCookie = await this.loadSessionCookie();
     if (sessionCookie) {
       const session = this.parseSessionCookieJson(sessionCookie);
       if (session) this.session = session;
@@ -68,7 +63,7 @@ export class AuthentificationService {
     });
   }
 
-  public async logout() {
+  public logout() {
     return cookieStore.delete(SESSION_COOKIE_NAME);
   }
 }
