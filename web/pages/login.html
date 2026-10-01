@@ -48,7 +48,7 @@
             <div
                 class="flex-1 flex bg-slate-50 z-10 flex-col items-center justify-center"
             >
-                <div class="flex flex-col gap-8.5 mx-10 max-w-md w-full">
+                <div class="flex flex-col gap-8.5 px-6 max-w-md w-full">
                     <div class="flex lg:hidden gap-2.5 items-center">
                         <div
                             class="size-4 bg-indigo-600 rounded-lg p-4 flex items-center justify-center"
@@ -65,6 +65,18 @@
                             Don't have an account? Contact your school
                             administrator.
                         </p>
+                    </div>
+                    <div
+                        id="error"
+                        class="rounded-lg border border-red-200 bg-red-50 py-3 px-4 hidden"
+                    >
+                        <div class="flex text-sm gap-3">
+                            <p class="text-red-700 font-bold">!</p>
+                            <p class="text-red-700">
+                                Incorrect email or password. Try again or reset
+                                your password.
+                            </p>
+                        </div>
                     </div>
                     <div class="flex flex-col gap-5">
                         <input-text-component
@@ -94,7 +106,15 @@
                             id="submit"
                             class="text-sm font-semibold p-2.5 text-white rounded-lg bg-indigo-600 hover:bg-indigo-800 cursor-pointer"
                         >
-                            Sign in
+                            <div class="flex items-center justify-center gap-3">
+                                <span
+                                    id="loading"
+                                    class="material-symbols-rounded text-[20px]! font-bold! animate-spin hidden!"
+                                >
+                                    progress_activity
+                                </span>
+                                <p>Sign in</p>
+                            </div>
                         </button>
                     </div>
                 </div>

@@ -27,6 +27,8 @@ export class InputTextComponent extends Component {
   private link: HTMLElement | null = null;
   private error: HTMLElement | null = null;
 
+  public validationMessage: string = "";
+
   constructor() {
     super();
   }
@@ -49,6 +51,7 @@ export class InputTextComponent extends Component {
     if (this.input) {
       this.input.addEventListener(CHANGE_EVENT, (event) => {
         const target: HTMLInputElement = event.target as HTMLInputElement;
+        this.validationMessage = target.validationMessage;
         this.renderError(target.validationMessage);
       });
 
