@@ -7,8 +7,16 @@ export interface Session {
   signature: string;
 }
 
-const SESSION_COOKIE_NAME: string = "session";
+export interface UserProfile {
+  firstName: string;
+  surName: string;
+  emai: string;
+}
 
+const SESSION_COOKIE_NAME: string = "session";
+const INCLUDE_CREDENTIALS: "include" = "include";
+
+const API_USER_PROFILE_ENDPOINT: string = "/auth/user-profile";
 const API_SIGN_IN_ENDPOINT: string = "/auth/login";
 const API_URL: string = "http://localhost:4200";
 const POST_METHOD: string = "POST";
@@ -16,6 +24,7 @@ const POST_METHOD: string = "POST";
 export class AuthentificationService {
   private static instance: Undefined<AuthentificationService>;
 
+  public userProfile: Undefined<UserProfile>;
   public session: Undefined<Session>;
 
   private constructor() {}
@@ -54,6 +63,28 @@ export class AuthentificationService {
       if (session) this.session = session;
       return session;
     }
+  }
+
+  public async loadUserProfile(): Promise<Undefined<UserProfile>> {
+    let userProfileRequest: Undefined<Promise<Response>>;
+
+    try {
+      const profileRequest = fetch(`${API_URL}${API_USER_PROFILE_ENDPOINT}`, {
+        credentials: INCLUDE_CREDENTIALS,
+      });
+
+      userProfileRequest = profileRequest;
+    } catch (error) {
+      return undefined;
+    }
+
+    const profile: UserProfile = await userProfileRequest.then((response) => {
+      return response.json();
+    });
+
+    this.userProfile = profile;
+
+    return profile;
   }
 
   public login(email: string, password: string): Promise<Response> {
