@@ -9,6 +9,10 @@ const LOGIN_PAGE: string = "/login";
 
 const CLICK_EVENT: string = "click";
 
+const DEFAULT_USERNAME: string = "User";
+
+const DEFAULT_AVATAR: string = "UR";
+
 export class HeaderComponent extends Component {
   private authService = AuthentificationService.inject();
 
@@ -37,7 +41,7 @@ export class HeaderComponent extends Component {
     if (userProfile) {
       return `${userProfile.firstName} ${userProfile.surName}`;
     } else {
-      return "User";
+      return DEFAULT_USERNAME;
     }
   }
 
@@ -47,7 +51,7 @@ export class HeaderComponent extends Component {
     if (userProfile) {
       return `${userProfile.firstName.slice(0, 1)}${userProfile.surName.slice(0, 1)}`;
     } else {
-      return "UR";
+      return DEFAULT_AVATAR;
     }
   }
 
