@@ -11,6 +11,7 @@ import type {
   ServerResponse,
   User,
   UserSessionKeys,
+  UserRegister,
 } from "@types";
 
 import { generateKeyPairSync, scryptSync } from "crypto";
@@ -63,6 +64,8 @@ const validator: Validator = new Validator();
 const registerSchema: Validator = validator.object({
   email: validator.string().required().min(3).max(128),
   password: validator.string().required().min(8),
+  firstName: validator.string().required().min(3),
+  surName: validator.string().required().min(3),
 });
 
 const database: Database = Database.init();
@@ -74,7 +77,7 @@ const registerHandler = async (
   request: ServerRequest,
   response: ServerResponse,
 ) => {
-  const body: UserBase = request.body as UserBase;
+  const body: UserRegister = request.body as UserRegister;
 
   const valid: boolean = registerSchema.validate(body);
 
