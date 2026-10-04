@@ -1,3 +1,4 @@
+import type { Role } from "#enums";
 import type { KeyPairExportResult } from "crypto";
 
 export interface UserBase {
@@ -8,6 +9,7 @@ export interface UserBase {
 export type UserRegister = UserBase & {
   firstName: string;
   surName: string;
+  class: number;
 };
 
 export type UserSessionKeys = KeyPairExportResult<{
@@ -26,4 +28,6 @@ export type User = UserBase & {
   surName: string;
   created: number;
   session: UserSessionKeys;
+  class: number;
+  role: Role;
 };

@@ -79,6 +79,18 @@ export class Validator {
     return true;
   }
 
+  private validateNumber(data: number) {
+    if (this.rules.min) {
+      if (data < this.rules.min) return false;
+    }
+
+    if (this.rules.max) {
+      if (data > this.rules.max) return false;
+    }
+
+    return true;
+  }
+
   private validateCategory(data: any) {
     if (!this.validateRequired(data)) return false;
 
@@ -87,6 +99,8 @@ export class Validator {
         return this.validateObject(data);
       case Shape.String:
         return this.validateString(data);
+      case Shape.Number:
+        return this.validateNumber(data);
       default:
         return true;
     }
@@ -110,6 +124,10 @@ export class Validator {
   }
 
   public string() {
+    return this.bindValidator(Shape.String, TypeOf.String);
+  }
+
+  public number() {
     return this.bindValidator(Shape.String, TypeOf.String);
   }
 

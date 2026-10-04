@@ -17,7 +17,7 @@ import type {
 import { generateKeyPairSync, scryptSync } from "crypto";
 
 import { Server } from "#server";
-import { CollectionName, Method } from "#enums";
+import { CollectionName, Method, Role } from "#enums";
 import { Validator } from "#validator";
 import { Database } from "#database";
 
@@ -66,6 +66,7 @@ const registerSchema: Validator = validator.object({
   password: validator.string().required().min(8),
   firstName: validator.string().required().min(3),
   surName: validator.string().required().min(3),
+  class: validator.number().required().min(1).max(3),
 });
 
 const database: Database = Database.init();
@@ -99,6 +100,7 @@ const registerHandler = async (
 
   await users.insertOne({
     ...body,
+    role: Role.Student,
     session: generateKeys(KEY_PAIR_ENCODING),
     password: hash,
     created: new Date().getTime(),
