@@ -1,7 +1,8 @@
 const STYLE_SHEET_HREF: string = "/styles.css";
 const STYLE_SHEET_TYPE: string = "stylesheet";
 const LINK_ELEMENT: "link" = "link";
-const SHADOW_MODE = "open";
+const SHADOW_MODE_OPEN: "open" = "open";
+const SHADOW_MODE_CLOSE: "closed" = "closed";
 
 export class Component extends HTMLElement {
   private initialize: () => void = () => {};
@@ -15,7 +16,7 @@ export class Component extends HTMLElement {
   constructor() {
     super();
 
-    this.document = this.attachShadow({ mode: SHADOW_MODE });
+    this.document = this.attachShadow({ mode: SHADOW_MODE_OPEN });
     this.loadStyles();
   }
 
