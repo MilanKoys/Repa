@@ -1,3 +1,4 @@
+import { CalendarComponent } from "./components/calendar/calendar.js";
 import { HeaderComponent } from "./components/header/header.js";
 import { HeroComponent } from "./components/hero/hero.js";
 import { InputTextComponent } from "./components/input-text/input-text.js";
@@ -13,3 +14,4 @@ customElements.define("shell-component", ShellComponent);
 customElements.define("header-component", HeaderComponent);
 customElements.define("input-text-component", InputTextComponent);
 customElements.define("hero-component", HeroComponent);
+customElements.define("calendar-component", CalendarComponent);
