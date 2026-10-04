@@ -1,9 +1,9 @@
 import { Component } from "../../component.js";
 
-export class CalendarComponent extends Component {
+export class WeeksComponent extends Component {
   constructor() {
     super();
-    this.loadTemplate("/components/calendar/calendar.html");
+    this.loadTemplate("/components/weeks/weeks.html");
   }
 
   protected async templateLoaded() {}
