@@ -14,6 +14,10 @@ interface Leaf {
   start: number;
 }
 
+const EMPTY_STRING: string = "";
+
+const CLICK_EVENT: string = "click";
+
 const ACTIVE_SEASON_PATH: string = "/season/active";
 
 const LEAF_COMPONENT_SELECTOR: string = "leaf-component";
@@ -22,6 +26,7 @@ const LEAF_STATUS_ATTRIBUTE: string = "status";
 const LEAF_ACTIVE_ATTRIBUTE: string = "active";
 const LEAF_DATE_ATTRIBUTE: string = "date";
 const LEAF_ACTIVE_VALUE: string = "true";
+const LEAF_COUNT: number = 16;
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 const DATE_FORMAT: string = "default";
@@ -34,6 +39,10 @@ const BASE_COUNT_INDEX: number = 0;
 
 export class WeeksComponent extends Component {
   private weeks: HTMLElement | null = null;
+  private previous: HTMLElement | null = null;
+  private next: HTMLElement | null = null;
+
+  private leafStart: Nullable<number> = null;
 
   constructor() {
     super();
@@ -44,22 +53,55 @@ export class WeeksComponent extends Component {
     return date.toLocaleString(DATE_FORMAT, DATE_FORMAT_OPTIONS);
   }
 
-  protected async templateLoaded() {
-    this.weeks = this.document.querySelector("#weeks");
-    this.renderWeeks();
+  private bindEvents() {
+    if (this.previous) {
+      this.previous.addEventListener(CLICK_EVENT, async () => {
+        const currentDate: number = new Date().getTime();
+        const leaf = await this.loadLeaf();
+        if (!leaf.season) return;
+        const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
+        const startDate: number = this.leafStart ?? leaf.season.start;
+        if (leaf.season.start <= startDate - adder) {
+          if (!this.leafStart) this.leafStart = startDate;
+          this.leafStart -= adder;
+          this.renderWeeks();
+        }
+      });
+    }
+
+    if (this.next) {
+      this.next.addEventListener(CLICK_EVENT, async () => {
+        const currentDate: number = new Date().getTime();
+        const leaf = await this.loadLeaf();
+        if (!leaf.season) return;
+        const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
+        const startDate: number = this.leafStart ?? leaf.season.start;
+        if (currentDate > startDate + adder) {
+          if (!this.leafStart) this.leafStart = startDate;
+          this.leafStart += adder;
+          this.renderWeeks();
+        }
+      });
+    }
   }
 
-  protected async renderWeeks() {
-    const leaf = await this.loadLeaf();
-    if (!leaf.season) return;
+  protected async templateLoaded() {
+    this.weeks = this.document.querySelector("#weeks");
+    this.previous = this.document.querySelector("#previous");
+    this.next = this.document.querySelector("#next");
+    this.renderWeeks();
+    this.bindEvents();
+  }
 
+  protected renderLeaves(startTime: number) {
     const currentTime: number = new Date().getTime();
-    const timeElapsed: number = currentTime - leaf.season.start;
+    const timeElapsed: number = currentTime - startTime;
     const weekCountBase: number = timeElapsed / WEEK_MILLISECONDS + WEEK_ADDED;
     const weekCount: number = Math.round(weekCountBase);
+    const maxCount: number = LEAF_COUNT < weekCount ? LEAF_COUNT : weekCount;
 
-    for (let counter = BASE_COUNT_INDEX; counter < weekCount; counter++) {
-      const weekTime: number = leaf.season.start + counter * WEEK_MILLISECONDS;
+    for (let counter = BASE_COUNT_INDEX; counter < maxCount; counter++) {
+      const weekTime: number = startTime + counter * WEEK_MILLISECONDS;
       const weekDate: Date = new Date(weekTime);
       const weekMonth: string = this.getMontName(weekDate);
       const weekMonthSlice: string = weekMonth.slice(MONTH_START, MONTH_END);
@@ -75,6 +117,13 @@ export class WeeksComponent extends Component {
 
       if (this.weeks) this.weeks.appendChild(leafElement);
     }
+  }
+
+  protected async renderWeeks() {
+    if (this.weeks) this.weeks.innerHTML = EMPTY_STRING;
+    const leaf = await this.loadLeaf();
+    if (!leaf.season) return;
+    this.renderLeaves(this.leafStart ?? leaf.season.start);
   }
 
   protected async loadLeaf(): Promise<ActiveLeaf> {

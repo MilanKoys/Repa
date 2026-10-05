@@ -5,6 +5,18 @@ const DATE_TEXT_NAME: string = "date";
 const ACTIVE_TEXT_NAME: string = "active";
 const STATUS_TEXT_NAME: string = "status";
 
+const ACTIVE_BACKGROUND_CLASS: string = "bg-indigo-100";
+const ACTIVE_BORDER_CLASS: string = "border-indigo-400";
+const INACTIVE_BACKGROUND_CLASS: string = "bg-white";
+const INACTIVE_BORDER_CLASS: string = "border-slate-200";
+
+const ACTIVATE_CLASS_LIST: string[] = [
+  ACTIVE_BACKGROUND_CLASS,
+  ACTIVE_BORDER_CLASS,
+  INACTIVE_BACKGROUND_CLASS,
+  INACTIVE_BORDER_CLASS,
+];
+
 const STATUS_DEFAULT_CLASS: string = "bg-slate-300";
 const STATUS_DRAFT_CLASS: string = "bg-indigo-400";
 const STATUS_SUBMITTED_CLASS: string = "bg-orange-400";
@@ -73,17 +85,18 @@ export class LeafComponent extends Component {
   }
 
   private toggleActive(toggle: boolean) {
-    if (this.shell) {
+    const shellElement = this.shell;
+    if (shellElement) {
+      ACTIVATE_CLASS_LIST.forEach((className) => {
+        shellElement.classList.remove(className);
+      });
+
       if (toggle) {
-        this.shell.classList.remove("border-slate-200");
-        this.shell.classList.remove("bg-white");
-        this.shell.classList.add("border-indigo-400");
-        this.shell.classList.add("bg-indigo-100");
+        shellElement.classList.add(ACTIVE_BORDER_CLASS);
+        shellElement.classList.add(ACTIVE_BACKGROUND_CLASS);
       } else {
-        this.shell.classList.add("border-slate-200");
-        this.shell.classList.add("bg-white");
-        this.shell.classList.remove("border-indigo-500");
-        this.shell.classList.remove("bg-indigo-100");
+        shellElement.classList.add(INACTIVE_BORDER_CLASS);
+        shellElement.classList.add(INACTIVE_BACKGROUND_CLASS);
       }
     }
   }
