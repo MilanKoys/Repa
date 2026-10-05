@@ -13,3 +13,8 @@ export interface CreateLeaf {
 export interface DeleteLeaf {
   id: UUID;
 }
+
+export interface SetLeaf {
+  id: UUID;
+  active: boolean;
+}

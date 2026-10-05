@@ -1,10 +1,11 @@
-import type { Collection, DeleteResult } from "mongodb";
+import type { Collection, DeleteResult, UpdateResult } from "mongodb";
 import type {
   CreateLeaf,
   DeleteLeaf,
   Leaf,
   ServerRequest,
   ServerResponse,
+  SetLeaf,
   Undefined,
   User,
 } from "@types";
@@ -36,6 +37,11 @@ const createLeafSchema: Validator = validator.object({
 
 const deleteLeafSchema: Validator = validator.object({
   id: validator.string().required(),
+});
+
+const setLeafSchema: Validator = validator.object({
+  id: validator.string().required(),
+  active: validator.boolean().required(),
 });
 
 const activeSeasonHandler = async (
@@ -140,7 +146,39 @@ const deleteSeasonHandler = async (
 const setSeasonHandler = async (
   request: ServerRequest,
   response: ServerResponse,
-) => {};
+) => {
+  const body: SetLeaf = request.body as SetLeaf;
+
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  if (!userLibrary.verifyRoles(user, VERIFIED_ROLES)) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  const valid: boolean = setLeafSchema.validate(body);
+
+  if (!valid) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+
+  const filter = { id: body.id };
+  const update = { $set: { active: body.active } };
+
+  const result: UpdateResult = await seasons.updateOne(filter, update);
+
+  response.json(result);
+};
 
 seasonRouter.route(Method.Get, seasonPath, listSeasonHandler);
 seasonRouter.route(Method.Post, seasonPath, createSeasonHandler);

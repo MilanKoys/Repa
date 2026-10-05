@@ -1,5 +1,6 @@
 import { Shape, TypeOf } from "#enums";
 import type { ValidationRules, Undefined, ObjectKey } from "@types";
+import type { webcrypto } from "crypto";
 
 type Schema = ObjectKey<Validator>;
 
@@ -91,6 +92,10 @@ export class Validator {
     return true;
   }
 
+  private validateBoolean(data: boolean) {
+    return true;
+  }
+
   private validateCategory(data: any) {
     if (!this.validateRequired(data)) return false;
 
@@ -101,6 +106,8 @@ export class Validator {
         return this.validateString(data);
       case Shape.Number:
         return this.validateNumber(data);
+      case Shape.Boolean:
+        return this.validateBoolean(data);
       default:
         return true;
     }
@@ -125,6 +132,10 @@ export class Validator {
 
   public string() {
     return this.bindValidator(Shape.String, TypeOf.String);
+  }
+
+  public boolean() {
+    return this.bindValidator(Shape.Boolean, TypeOf.Boolean);
   }
 
   public number() {
