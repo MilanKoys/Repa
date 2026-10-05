@@ -51,6 +51,7 @@ export class WeeksComponent extends Component {
   private previous: Nullable<HTMLElement> = null;
   private next: Nullable<HTMLElement> = null;
   private last: Nullable<HTMLElement> = null;
+  private range: Nullable<HTMLElement> = null;
 
   private page: number = 0;
   private leaf: Undefined<ActiveLeaf>;
@@ -198,9 +199,42 @@ export class WeeksComponent extends Component {
     this.previous = this.document.querySelector("#previous");
     this.next = this.document.querySelector("#next");
     this.last = this.document.querySelector("#last");
+    this.range = this.document.querySelector("#range");
 
     this.initialRender();
     this.bindEvents();
+  }
+
+  private calculateRangeDate(time: number, base: number) {
+    const baseTime: number = time + base * WEEK_MILLISECONDS;
+    const date: Date = new Date(baseTime);
+    const month: string = this.getMontName(date);
+    const monthSlice: string = month.slice(MONTH_START, MONTH_END);
+    const dateString: string = `${date.getDate()} ${monthSlice}`;
+
+    return dateString;
+  }
+
+  private renderRange(time: number) {
+    const currentTime: number = new Date().getTime();
+    const timeElapsed: number = currentTime - time;
+    const weekCountBase: number = timeElapsed / WEEK_MILLISECONDS + WEEK_ADDED;
+    const weekCount: number = Math.round(weekCountBase);
+    const maxCount: number = LEAF_COUNT < weekCount ? LEAF_COUNT : weekCount;
+    const realCount: number = maxCount - ONE;
+
+    const startDate: string = this.calculateRangeDate(time, BASE_COUNT_INDEX);
+    const endDate: string = this.calculateRangeDate(time, realCount);
+
+    let rangeString: string = `${startDate} - ${endDate}`;
+
+    if (startDate === endDate) {
+      rangeString = startDate;
+    }
+
+    if (this.range) {
+      this.range.textContent = rangeString;
+    }
   }
 
   protected renderLeaves(startTime: number) {
@@ -235,6 +269,7 @@ export class WeeksComponent extends Component {
     if (this.weeks) this.weeks.innerHTML = EMPTY_STRING;
     const leaf = await this.loadLeaf();
     if (!leaf.season) return;
+    this.renderRange(this.leafStart ?? leaf.season.start);
     this.renderLeaves(this.leafStart ?? leaf.season.start);
   }
 
