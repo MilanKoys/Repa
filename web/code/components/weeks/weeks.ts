@@ -15,6 +15,7 @@ interface Leaf {
   start: number;
 }
 
+const ZERO: number = 0;
 const EMPTY_STRING: string = "";
 
 const CLICK_EVENT: string = "click";
@@ -59,36 +60,77 @@ export class WeeksComponent extends Component {
     return date.toLocaleString(DATE_FORMAT, DATE_FORMAT_OPTIONS);
   }
 
+  private async calculateActions() {
+    const leaf = await this.loadLeaf();
+    if (!leaf.season) return;
+    const leafStart: number = leaf.season.start;
+    const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
+    const startDate: number = this.leafStart ?? leaf.season.start;
+
+    return { adder, startDate, leafStart };
+  }
+
+  private toggleActionClass(element: HTMLElement, toggle: boolean) {
+    if (toggle) {
+      element.classList.remove(DISABLE_ACTION_OPACITY_CLASS);
+      element.classList.add(ENABLED_ACTION_CURSOR_CLASS);
+      element.classList.add(ENABLED_ACTION_HOVER_BACKGROUND);
+    } else {
+      element.classList.add(DISABLE_ACTION_OPACITY_CLASS);
+      element.classList.remove(ENABLED_ACTION_CURSOR_CLASS);
+      element.classList.remove(ENABLED_ACTION_HOVER_BACKGROUND);
+    }
+  }
+
+  private executeEvent(adder: number, startDate: number) {
+    if (!this.leafStart) this.leafStart = startDate;
+    this.leafStart += adder;
+    this.renderWeeks();
+    this.disableEvents();
+  }
+
+  private async calculatePrevious() {
+    const dates = await this.calculateActions();
+    let toggle: boolean = false;
+    if (!dates) {
+      return { toggle, adder: ZERO, startDate: ZERO, leafStart: ZERO };
+    }
+
+    const { adder, startDate, leafStart } = dates;
+    toggle = leafStart <= startDate - adder;
+    return { toggle, adder, startDate, leafStart };
+  }
+
+  private async calculateNext() {
+    const dates = await this.calculateActions();
+    let toggle: boolean = false;
+    if (!dates) {
+      return { toggle, adder: ZERO, startDate: ZERO };
+    }
+
+    const currentDate: number = new Date().getTime();
+    const { adder, startDate, leafStart } = dates;
+    toggle = currentDate > startDate + adder;
+    return { toggle, adder, startDate, leafStart };
+  }
+
   private bindEvents() {
     this.disableEvents();
 
     if (this.previous) {
       this.previous.addEventListener(CLICK_EVENT, async () => {
-        const leaf = await this.loadLeaf();
-        if (!leaf.season) return;
-        const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
-        const startDate: number = this.leafStart ?? leaf.season.start;
-        if (leaf.season.start <= startDate - adder) {
-          if (!this.leafStart) this.leafStart = startDate;
-          this.leafStart -= adder;
-          this.renderWeeks();
-          this.disableEvents();
+        const { adder, startDate, toggle } = await this.calculatePrevious();
+        if (toggle) {
+          this.executeEvent(-adder, startDate);
         }
       });
     }
 
     if (this.next) {
       this.next.addEventListener(CLICK_EVENT, async () => {
-        const currentDate: number = new Date().getTime();
-        const leaf = await this.loadLeaf();
-        if (!leaf.season) return;
-        const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
-        const startDate: number = this.leafStart ?? leaf.season.start;
-        if (currentDate > startDate + adder) {
-          if (!this.leafStart) this.leafStart = startDate;
-          this.leafStart += adder;
-          this.renderWeeks();
-          this.disableEvents();
+        const { toggle, adder, startDate } = await this.calculateNext();
+        if (toggle) {
+          this.executeEvent(adder, startDate);
         }
       });
     }
@@ -96,36 +138,13 @@ export class WeeksComponent extends Component {
 
   private async disableEvents() {
     if (this.previous) {
-      const leaf = await this.loadLeaf();
-      if (!leaf.season) return;
-      const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
-      const startDate: number = this.leafStart ?? leaf.season.start;
-      if (leaf.season.start <= startDate - adder) {
-        this.previous.classList.remove(DISABLE_ACTION_OPACITY_CLASS);
-        this.previous.classList.add(ENABLED_ACTION_CURSOR_CLASS);
-        this.previous.classList.add(ENABLED_ACTION_HOVER_BACKGROUND);
-      } else {
-        this.previous.classList.add(DISABLE_ACTION_OPACITY_CLASS);
-        this.previous.classList.remove(ENABLED_ACTION_CURSOR_CLASS);
-        this.previous.classList.remove(ENABLED_ACTION_HOVER_BACKGROUND);
-      }
+      const { toggle } = await this.calculatePrevious();
+      this.toggleActionClass(this.previous, toggle);
     }
 
     if (this.next) {
-      const currentDate: number = new Date().getTime();
-      const leaf = await this.loadLeaf();
-      if (!leaf.season) return;
-      const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
-      const startDate: number = this.leafStart ?? leaf.season.start;
-      if (currentDate > startDate + adder) {
-        this.next.classList.remove(DISABLE_ACTION_OPACITY_CLASS);
-        this.next.classList.add(ENABLED_ACTION_CURSOR_CLASS);
-        this.next.classList.add(ENABLED_ACTION_HOVER_BACKGROUND);
-      } else {
-        this.next.classList.add(DISABLE_ACTION_OPACITY_CLASS);
-        this.next.classList.remove(ENABLED_ACTION_CURSOR_CLASS);
-        this.next.classList.remove(ENABLED_ACTION_HOVER_BACKGROUND);
-      }
+      const { toggle } = await this.calculateNext();
+      this.toggleActionClass(this.next, toggle);
     }
   }
 
