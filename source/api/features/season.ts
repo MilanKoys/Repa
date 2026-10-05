@@ -67,7 +67,22 @@ const activeSeasonHandler = async (
 const listSeasonHandler = async (
   request: ServerRequest,
   response: ServerResponse,
-) => {};
+) => {
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+
+  const seasonList = await seasons.find().toArray();
+
+  response.json(seasonList);
+};
 
 const createSeasonHandler = async (
   request: ServerRequest,
