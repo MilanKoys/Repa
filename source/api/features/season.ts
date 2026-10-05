@@ -1,6 +1,7 @@
-import type { Collection } from "mongodb";
+import type { Collection, DeleteResult } from "mongodb";
 import type {
   CreateLeaf,
+  DeleteLeaf,
   Leaf,
   ServerRequest,
   ServerResponse,
@@ -13,6 +14,7 @@ import { CollectionName, Method, Role } from "#enums";
 import { Database } from "#database";
 import { UserLibrary } from "#library";
 import { Validator } from "#validator";
+import { randomUUID } from "crypto";
 
 const VERIFIED_ROLES: Role[] = [Role.Admin, Role.Teacher];
 
@@ -30,6 +32,10 @@ const validator: Validator = new Validator();
 
 const createLeafSchema: Validator = validator.object({
   start: validator.number().required(),
+});
+
+const deleteLeafSchema: Validator = validator.object({
+  id: validator.string().required(),
 });
 
 const activeSeasonHandler = async (
@@ -87,6 +93,7 @@ const createSeasonHandler = async (
   const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
 
   const newLeaf: Leaf = {
+    id: randomUUID(),
     active: false,
     start: body.start,
   };
@@ -99,7 +106,36 @@ const createSeasonHandler = async (
 const deleteSeasonHandler = async (
   request: ServerRequest,
   response: ServerResponse,
-) => {};
+) => {
+  const body: DeleteLeaf = request.body as DeleteLeaf;
+
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  if (!userLibrary.verifyRoles(user, VERIFIED_ROLES)) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  const valid: boolean = deleteLeafSchema.validate(body);
+
+  if (!valid) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+
+  const result: DeleteResult = await seasons.deleteOne(body);
+
+  response.json(result);
+};
 
 const setSeasonHandler = async (
   request: ServerRequest,
