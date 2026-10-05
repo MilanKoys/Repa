@@ -183,13 +183,23 @@ export class WeeksComponent extends Component {
     }
   }
 
+  private async initialRender() {
+    const { toggle } = await this.calculateNext();
+
+    if (!toggle) {
+      this.renderWeeks();
+    } else {
+      this.scrollLast();
+    }
+  }
+
   protected async templateLoaded() {
     this.weeks = this.document.querySelector("#weeks");
     this.previous = this.document.querySelector("#previous");
     this.next = this.document.querySelector("#next");
     this.last = this.document.querySelector("#last");
 
-    this.scrollLast();
+    this.initialRender();
     this.bindEvents();
   }
 
