@@ -20,12 +20,37 @@ const database: Database = Database.init();
 const userLibrary: UserLibrary = UserLibrary.inject();
 
 const seasonRouter: Server = new Server();
+
+const activePath: string = "/active";
 const seasonPath: string = "/season";
+
+const activeSeasonPath: string = `${seasonPath}${activePath}`;
+
 const validator: Validator = new Validator();
 
 const createLeafSchema: Validator = validator.object({
   start: validator.number().required(),
 });
+
+const activeSeasonHandler = async (
+  request: ServerRequest,
+  response: ServerResponse,
+) => {
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+
+  const season = await seasons.findOne({ active: true });
+
+  response.json({ season });
+};
 
 const listSeasonHandler = async (
   request: ServerRequest,
@@ -85,5 +110,7 @@ seasonRouter.route(Method.Get, seasonPath, listSeasonHandler);
 seasonRouter.route(Method.Post, seasonPath, createSeasonHandler);
 seasonRouter.route(Method.Delete, seasonPath, deleteSeasonHandler);
 seasonRouter.route(Method.Put, seasonPath, setSeasonHandler);
+
+seasonRouter.route(Method.Get, activeSeasonPath, activeSeasonHandler);
 
 export default seasonRouter;
