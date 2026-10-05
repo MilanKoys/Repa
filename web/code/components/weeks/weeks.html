@@ -17,5 +17,30 @@
             </div>
         </div>
     </div>
-    <div id="weeks" class="flex gap-2 pb-2 overflow-auto"></div>
+    <div
+        id="weeks"
+        class="grid auto-cols-auto xl:grid-cols-16 lg:grid-cols-8 md:grid-cols-8 sm:grid-cols-4 grid-cols-4 gap-2 pb-2"
+    ></div>
+    <div class="flex gap-3.5 flex-wrap">
+        <div class="flex items-center gap-1.5">
+            <div id="status" class="w-4 h-1 bg-slate-300 rounded-full"></div>
+            <p class="text-xs text-slate-500 font-light">Empty</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <div id="status" class="w-4 h-1 bg-indigo-400 rounded-full"></div>
+            <p class="text-xs text-slate-500 font-light">Draft</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <div id="status" class="w-4 h-1 bg-orange-400 rounded-full"></div>
+            <p class="text-xs text-slate-500 font-light">Submitted</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <div id="status" class="w-4 h-1 bg-green-500 rounded-full"></div>
+            <p class="text-xs text-slate-500 font-light">Approved</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <div id="status" class="w-4 h-1 bg-red-400 rounded-full"></div>
+            <p class="text-xs text-slate-500 font-light">Rejected</p>
+        </div>
+    </div>
 </div>
