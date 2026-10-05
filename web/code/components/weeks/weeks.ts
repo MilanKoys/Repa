@@ -3,6 +3,7 @@ import { API_URL } from "../../constants/api.js";
 import { LeafStatus } from "../leaf/leaf.js";
 
 type Nullable<T> = null | T;
+type Undefined<T> = undefined | T;
 
 interface ActiveLeaf {
   season: Nullable<Leaf>;
@@ -38,10 +39,11 @@ const WEEK_MILLISECONDS: number = 604800000;
 const BASE_COUNT_INDEX: number = 0;
 
 export class WeeksComponent extends Component {
-  private weeks: HTMLElement | null = null;
-  private previous: HTMLElement | null = null;
-  private next: HTMLElement | null = null;
+  private weeks: Nullable<HTMLElement> = null;
+  private previous: Nullable<HTMLElement> = null;
+  private next: Nullable<HTMLElement> = null;
 
+  private leaf: Undefined<ActiveLeaf>;
   private leafStart: Nullable<number> = null;
 
   constructor() {
@@ -127,8 +129,11 @@ export class WeeksComponent extends Component {
   }
 
   protected async loadLeaf(): Promise<ActiveLeaf> {
+    const leaf: Undefined<ActiveLeaf> = this.leaf;
+    if (leaf) return new Promise((resolve) => resolve(leaf));
     const request: Response = await fetch(`${API_URL}${ACTIVE_SEASON_PATH}`);
     const activeSeason: ActiveLeaf = await request.json();
+    this.leaf = activeSeason;
     return activeSeason;
   }
 }

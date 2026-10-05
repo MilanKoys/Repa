@@ -1,14 +1,16 @@
 const STYLE_SHEET_HREF: string = "/styles.css";
-const STYLE_SHEET_TYPE: string = "stylesheet";
-const LINK_ELEMENT: "link" = "link";
+const EMPTY_STRING: string = "";
 const SHADOW_MODE_OPEN: "open" = "open";
 const TEMPLATE_ELEMENT: "template" = "template";
 
+type Undefined<T> = undefined | T;
 type TemplateMap = Map<string, Promise<HTMLTemplateElement>>;
 type TemplatePromise = Promise<HTMLTemplateElement>;
 
 export class Component extends HTMLElement {
   private static templates: TemplateMap = new Map();
+  private static styleSheet: CSSStyleSheet = new CSSStyleSheet();
+  private static styleSheetLoaded: Undefined<Promise<void>>;
 
   private initialize: () => void = () => {};
 
@@ -22,14 +24,24 @@ export class Component extends HTMLElement {
     super();
 
     this.document = this.attachShadow({ mode: SHADOW_MODE_OPEN });
-    this.loadStyles();
+    this.document.adoptedStyleSheets = [Component.styleSheet];
   }
 
-  private loadStyles() {
-    const link: HTMLLinkElement = document.createElement(LINK_ELEMENT);
-    link.rel = STYLE_SHEET_TYPE;
-    link.href = STYLE_SHEET_HREF;
-    this.document.appendChild(link);
+  private static async fetchStyles(): Promise<void> {
+    const response: Response = await fetch(STYLE_SHEET_HREF);
+    if (!response.ok) throw new Error(`Failed to load ${STYLE_SHEET_HREF}`);
+
+    const styles: string = await response.text();
+
+    await Component.styleSheet.replace(styles);
+  }
+
+  private static loadStyleSheet(): Promise<void> {
+    if (!Component.styleSheetLoaded) {
+      Component.styleSheetLoaded = Component.fetchStyles();
+    }
+
+    return Component.styleSheetLoaded;
   }
 
   private static async fetchTemplate(templatePath: string): TemplatePromise {
@@ -59,6 +71,8 @@ export class Component extends HTMLElement {
 
   protected async loadTemplate(templatePath: string) {
     const template = await Component.getTemplate(templatePath);
+
+    await Component.loadStyleSheet();
 
     this.document.appendChild(template.content.cloneNode(true));
     this.initialize();
