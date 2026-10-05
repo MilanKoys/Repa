@@ -1,5 +1,4 @@
 const STYLE_SHEET_HREF: string = "/styles.css";
-const EMPTY_STRING: string = "";
 const SHADOW_MODE_OPEN: "open" = "open";
 const TEMPLATE_ELEMENT: "template" = "template";
 

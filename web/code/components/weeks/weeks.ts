@@ -21,6 +21,10 @@ const CLICK_EVENT: string = "click";
 
 const ACTIVE_SEASON_PATH: string = "/season/active";
 
+const DISABLE_ACTION_OPACITY_CLASS: string = "opacity-50";
+const ENABLED_ACTION_CURSOR_CLASS: string = "cursor-pointer";
+const ENABLED_ACTION_HOVER_BACKGROUND: string = "hover:bg-slate-100";
+
 const LEAF_COMPONENT_SELECTOR: string = "leaf-component";
 const LEAF_WEEK_ATTRIBUTE: string = "week";
 const LEAF_STATUS_ATTRIBUTE: string = "status";
@@ -56,9 +60,10 @@ export class WeeksComponent extends Component {
   }
 
   private bindEvents() {
+    this.disableEvents();
+
     if (this.previous) {
       this.previous.addEventListener(CLICK_EVENT, async () => {
-        const currentDate: number = new Date().getTime();
         const leaf = await this.loadLeaf();
         if (!leaf.season) return;
         const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
@@ -67,6 +72,7 @@ export class WeeksComponent extends Component {
           if (!this.leafStart) this.leafStart = startDate;
           this.leafStart -= adder;
           this.renderWeeks();
+          this.disableEvents();
         }
       });
     }
@@ -82,8 +88,44 @@ export class WeeksComponent extends Component {
           if (!this.leafStart) this.leafStart = startDate;
           this.leafStart += adder;
           this.renderWeeks();
+          this.disableEvents();
         }
       });
+    }
+  }
+
+  private async disableEvents() {
+    if (this.previous) {
+      const leaf = await this.loadLeaf();
+      if (!leaf.season) return;
+      const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
+      const startDate: number = this.leafStart ?? leaf.season.start;
+      if (leaf.season.start <= startDate - adder) {
+        this.previous.classList.remove(DISABLE_ACTION_OPACITY_CLASS);
+        this.previous.classList.add(ENABLED_ACTION_CURSOR_CLASS);
+        this.previous.classList.add(ENABLED_ACTION_HOVER_BACKGROUND);
+      } else {
+        this.previous.classList.add(DISABLE_ACTION_OPACITY_CLASS);
+        this.previous.classList.remove(ENABLED_ACTION_CURSOR_CLASS);
+        this.previous.classList.remove(ENABLED_ACTION_HOVER_BACKGROUND);
+      }
+    }
+
+    if (this.next) {
+      const currentDate: number = new Date().getTime();
+      const leaf = await this.loadLeaf();
+      if (!leaf.season) return;
+      const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
+      const startDate: number = this.leafStart ?? leaf.season.start;
+      if (currentDate > startDate + adder) {
+        this.next.classList.remove(DISABLE_ACTION_OPACITY_CLASS);
+        this.next.classList.add(ENABLED_ACTION_CURSOR_CLASS);
+        this.next.classList.add(ENABLED_ACTION_HOVER_BACKGROUND);
+      } else {
+        this.next.classList.add(DISABLE_ACTION_OPACITY_CLASS);
+        this.next.classList.remove(ENABLED_ACTION_CURSOR_CLASS);
+        this.next.classList.remove(ENABLED_ACTION_HOVER_BACKGROUND);
+      }
     }
   }
 
