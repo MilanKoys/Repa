@@ -23,6 +23,8 @@ const CLICK_EVENT: string = "click";
 
 const ACTIVE_SEASON_PATH: string = "/season/active";
 
+const HIDDEN_CLASS: string = "hidden";
+
 const DISABLE_ACTION_OPACITY_CLASS: string = "opacity-50";
 const ENABLED_ACTION_CURSOR_CLASS: string = "cursor-pointer";
 const ENABLED_ACTION_HOVER_BACKGROUND: string = "hover:bg-slate-100";
@@ -48,8 +50,9 @@ export class WeeksComponent extends Component {
   private weeks: Nullable<HTMLElement> = null;
   private previous: Nullable<HTMLElement> = null;
   private next: Nullable<HTMLElement> = null;
-  private page: number = 0;
+  private last: Nullable<HTMLElement> = null;
 
+  private page: number = 0;
   private leaf: Undefined<ActiveLeaf>;
   private leafStart: Nullable<number> = null;
 
@@ -143,6 +146,20 @@ export class WeeksComponent extends Component {
     if (this.next) {
       this.next.addEventListener(CLICK_EVENT, () => this.executeNext());
     }
+
+    if (this.last) {
+      this.last.addEventListener(CLICK_EVENT, () => this.scrollLast());
+    }
+  }
+
+  private renderLastAction(toggle: boolean) {
+    if (this.last) {
+      if (!toggle) {
+        this.last.classList.add(HIDDEN_CLASS);
+      } else {
+        this.last.classList.remove(HIDDEN_CLASS);
+      }
+    }
   }
 
   private async disableEvents() {
@@ -153,6 +170,7 @@ export class WeeksComponent extends Component {
 
     if (this.next) {
       const { toggle } = await this.calculateNext();
+      this.renderLastAction(toggle);
       this.toggleActionClass(this.next, toggle);
     }
   }
@@ -160,8 +178,8 @@ export class WeeksComponent extends Component {
   private async scrollLast() {
     let next = await this.executeNext();
     while (next) {
-      next = await this.executeNext();
       if (this.weeks) this.weeks.innerHTML = EMPTY_STRING;
+      next = await this.executeNext();
     }
   }
 
@@ -169,9 +187,9 @@ export class WeeksComponent extends Component {
     this.weeks = this.document.querySelector("#weeks");
     this.previous = this.document.querySelector("#previous");
     this.next = this.document.querySelector("#next");
+    this.last = this.document.querySelector("#last");
 
     this.scrollLast();
-    this.renderWeeks();
     this.bindEvents();
   }
 
