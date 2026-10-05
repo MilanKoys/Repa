@@ -128,7 +128,7 @@ export class Validator {
   }
 
   public number() {
-    return this.bindValidator(Shape.String, TypeOf.String);
+    return this.bindValidator(Shape.Number, TypeOf.Number);
   }
 
   public required() {

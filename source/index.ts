@@ -11,6 +11,7 @@ import { dynamicServe, jsonBody, logger } from "#middleware";
 import { authRouter } from "#api";
 import { Database } from "#database";
 import { WebSocket as WebSocketServer } from "./websocket.js";
+import seasonRouter from "./api/features/season.js";
 
 const WS_PORT: number = 3000;
 const WS_LISTEN_MESSAGE: string = `Websocket on http://localhost:${WS_PORT}`;
@@ -70,6 +71,7 @@ webSocketServer.listen(WS_PORT, WS_LISTEN_CALLBACK);
 
 server.use(jsonBody);
 server.join(authRouter);
+server.join(seasonRouter);
 server.use(dynamicServe(WEB_PAGES_PATH, SERVE_OPTIONS));
 server.use(dynamicServe(WEB_DISTRIBUTION_PATH));
 server.use(dynamicServe(WEB_STYLES_PATH));

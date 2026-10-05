@@ -66,7 +66,7 @@ const registerSchema: Validator = validator.object({
   password: validator.string().required().min(8),
   firstName: validator.string().required().min(3),
   surName: validator.string().required().min(3),
-  class: validator.number().required().min(1).max(3),
+  class: validator.number().min(1).max(3),
 });
 
 const database: Database = Database.init();

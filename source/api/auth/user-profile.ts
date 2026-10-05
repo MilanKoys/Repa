@@ -1,19 +1,10 @@
-import type { Collection } from "mongodb";
-import type {
-  ServerRequest,
-  ServerResponse,
-  Token,
-  Undefined,
-  User,
-} from "@types";
+import type { ServerRequest, ServerResponse, Undefined, User } from "@types";
 
 import { Server } from "#server";
-import { CollectionName, Method } from "#enums";
-import { Database } from "#database";
-import { Session } from "#session";
+import { Method } from "#enums";
+import { UserLibrary } from "#library";
 
-const database: Database = Database.init();
-const session: Session = Session.init();
+const userLibrary: UserLibrary = UserLibrary.inject();
 
 const userProfileRouter: Server = new Server();
 
@@ -24,38 +15,17 @@ const userProfileHandler = async (
 ) => {
   const cookies = request.incomingMessage.headers.cookie;
 
-  if (!cookies) {
-    response.outgoingMessage.statusCode = 400;
-    return response.outgoingMessage.end();
-  }
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
 
-  const sessionToken: Undefined<Token> = session.parseSessionCookie(cookies);
-
-  if (!sessionToken) {
-    response.outgoingMessage.statusCode = 401;
-    return response.outgoingMessage.end();
-  }
-
-  const users: Collection<User> = database.collection(CollectionName.Users);
-
-  const foundUser = await users.findOne({ email: sessionToken.email });
-
-  if (!foundUser) {
-    response.outgoingMessage.statusCode = 401;
-    return response.outgoingMessage.end();
-  }
-
-  const verify = session.verifySession(foundUser, sessionToken);
-
-  if (!verify) {
+  if (!user) {
     response.outgoingMessage.statusCode = 401;
     return response.outgoingMessage.end();
   }
 
   response.json({
-    firstName: foundUser.firstName,
-    surName: foundUser.surName,
-    email: foundUser.email,
+    firstName: user.firstName,
+    surName: user.surName,
+    email: user.email,
   });
 };
 

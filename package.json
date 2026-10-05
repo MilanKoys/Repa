@@ -10,6 +10,7 @@
     "#enums": "./build/enums/index.js",
     "#api": "./build/api/index.js",
     "#middleware": "./build/middleware/index.js",
+    "#library": "./build/library/index.js",
     "#server": "./build/server.js",
     "#database": "./build/database.js",
     "#websocket": "./build/websocket.js",

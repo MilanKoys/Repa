@@ -23,11 +23,16 @@ export type UserSessionKeys = KeyPairExportResult<{
   };
 }>;
 
-export type User = UserBase & {
+export interface UserOptional {
+  class?: number;
+}
+
+export type UserFields = UserBase & UserOptional;
+
+export type User = UserFields & {
   firstName: string;
   surName: string;
   created: number;
   session: UserSessionKeys;
-  class: number;
   role: Role;
 };
