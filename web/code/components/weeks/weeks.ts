@@ -16,6 +16,7 @@ interface Leaf {
 }
 
 const ZERO: number = 0;
+const ONE: number = 1;
 const EMPTY_STRING: string = "";
 
 const CLICK_EVENT: string = "click";
@@ -47,6 +48,7 @@ export class WeeksComponent extends Component {
   private weeks: Nullable<HTMLElement> = null;
   private previous: Nullable<HTMLElement> = null;
   private next: Nullable<HTMLElement> = null;
+  private page: number = 0;
 
   private leaf: Undefined<ActiveLeaf>;
   private leafStart: Nullable<number> = null;
@@ -84,6 +86,7 @@ export class WeeksComponent extends Component {
 
   private executeEvent(adder: number, startDate: number) {
     if (!this.leafStart) this.leafStart = startDate;
+    this.page += Math.sign(adder);
     this.leafStart += adder;
     this.renderWeeks();
     this.disableEvents();
@@ -114,25 +117,31 @@ export class WeeksComponent extends Component {
     return { toggle, adder, startDate, leafStart };
   }
 
+  private async executeNext() {
+    const { toggle, adder, startDate } = await this.calculateNext();
+    if (toggle) {
+      this.executeEvent(adder, startDate);
+    }
+
+    return toggle;
+  }
+
+  private async executePrevious() {
+    const { adder, startDate, toggle } = await this.calculatePrevious();
+    if (toggle) {
+      this.executeEvent(-adder, startDate);
+    }
+  }
+
   private bindEvents() {
     this.disableEvents();
 
     if (this.previous) {
-      this.previous.addEventListener(CLICK_EVENT, async () => {
-        const { adder, startDate, toggle } = await this.calculatePrevious();
-        if (toggle) {
-          this.executeEvent(-adder, startDate);
-        }
-      });
+      this.previous.addEventListener(CLICK_EVENT, () => this.executePrevious());
     }
 
     if (this.next) {
-      this.next.addEventListener(CLICK_EVENT, async () => {
-        const { toggle, adder, startDate } = await this.calculateNext();
-        if (toggle) {
-          this.executeEvent(adder, startDate);
-        }
-      });
+      this.next.addEventListener(CLICK_EVENT, () => this.executeNext());
     }
   }
 
@@ -148,10 +157,20 @@ export class WeeksComponent extends Component {
     }
   }
 
+  private async scrollLast() {
+    let next = await this.executeNext();
+    while (next) {
+      next = await this.executeNext();
+      if (this.weeks) this.weeks.innerHTML = EMPTY_STRING;
+    }
+  }
+
   protected async templateLoaded() {
     this.weeks = this.document.querySelector("#weeks");
     this.previous = this.document.querySelector("#previous");
     this.next = this.document.querySelector("#next");
+
+    this.scrollLast();
     this.renderWeeks();
     this.bindEvents();
   }
@@ -170,12 +189,14 @@ export class WeeksComponent extends Component {
       const weekMonthSlice: string = weekMonth.slice(MONTH_START, MONTH_END);
       const weekDateString: string = `${weekDate.getDate()} ${weekMonthSlice}`;
       const leafElement = document.createElement(LEAF_COMPONENT_SELECTOR);
+      const skippedCounter: number = this.page * LEAF_COUNT;
+      const weekLabel: string = `W${counter + skippedCounter + WEEK_ADDED}`;
 
       if (counter == weekCount - WEEK_ADDED) {
         leafElement.setAttribute(LEAF_ACTIVE_ATTRIBUTE, LEAF_ACTIVE_VALUE);
       }
 
-      leafElement.setAttribute(LEAF_WEEK_ATTRIBUTE, `W${counter + WEEK_ADDED}`);
+      leafElement.setAttribute(LEAF_WEEK_ATTRIBUTE, weekLabel);
       leafElement.setAttribute(LEAF_DATE_ATTRIBUTE, `${weekDateString}`);
 
       if (this.weeks) this.weeks.appendChild(leafElement);
