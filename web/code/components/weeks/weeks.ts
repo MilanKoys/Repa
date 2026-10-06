@@ -1,5 +1,6 @@
 import { Component } from "../../component.js";
 import { API_URL } from "../../constants/api.js";
+import { NavigationService } from "../../services/navigation.js";
 import { LeafStatus } from "../leaf/leaf.js";
 
 type Nullable<T> = null | T;
@@ -22,8 +23,11 @@ const EMPTY_STRING: string = "";
 const CLICK_EVENT: string = "click";
 
 const ACTIVE_SEASON_PATH: string = "/season/active";
+const ATTENDANCE_PATH: string = "attendance";
 
 const HIDDEN_CLASS: string = "hidden";
+
+const STORAGE_WEEK_KEY: string = "week";
 
 const DISABLE_ACTION_OPACITY_CLASS: string = "opacity-50";
 const ENABLED_ACTION_CURSOR_CLASS: string = "cursor-pointer";
@@ -47,6 +51,8 @@ const WEEK_MILLISECONDS: number = 604800000;
 const BASE_COUNT_INDEX: number = 0;
 
 export class WeeksComponent extends Component {
+  private navigationService: NavigationService = NavigationService.inject();
+
   private weeks: Nullable<HTMLElement> = null;
   private previous: Nullable<HTMLElement> = null;
   private next: Nullable<HTMLElement> = null;
@@ -60,6 +66,11 @@ export class WeeksComponent extends Component {
   constructor() {
     super();
     this.loadTemplate("/components/weeks/weeks.html");
+  }
+
+  private openWeek(number: number) {
+    sessionStorage.setItem(STORAGE_WEEK_KEY, number.toString());
+    this.navigationService.navigate(ATTENDANCE_PATH);
   }
 
   private getMontName(date: Date) {
@@ -252,7 +263,8 @@ export class WeeksComponent extends Component {
       const weekDateString: string = `${weekDate.getDate()} ${weekMonthSlice}`;
       const leafElement = document.createElement(LEAF_COMPONENT_SELECTOR);
       const skippedCounter: number = this.page * LEAF_COUNT;
-      const weekLabel: string = `W${counter + skippedCounter + WEEK_ADDED}`;
+      const realCounter: number = counter + skippedCounter + WEEK_ADDED;
+      const weekLabel: string = `W${realCounter}`;
 
       if (counter == weekCount - WEEK_ADDED) {
         leafElement.setAttribute(LEAF_ACTIVE_ATTRIBUTE, LEAF_ACTIVE_VALUE);
@@ -260,6 +272,10 @@ export class WeeksComponent extends Component {
 
       leafElement.setAttribute(LEAF_WEEK_ATTRIBUTE, weekLabel);
       leafElement.setAttribute(LEAF_DATE_ATTRIBUTE, `${weekDateString}`);
+
+      leafElement.addEventListener(CLICK_EVENT, () => {
+        this.openWeek(realCounter);
+      });
 
       if (this.weeks) this.weeks.appendChild(leafElement);
     }

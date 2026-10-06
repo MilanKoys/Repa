@@ -1,0 +1,75 @@
+<div class="flex justify-center">
+    <div class="flex flex-col gap-4 max-w-4xl w-full">
+        <div class="flex">
+            <a
+                href="/"
+                class="text-slate-500 text-xs cursor-pointer flex items-center gap-1 hover:text-slate-700"
+            >
+                <span class="material-symbols-rounded text-sm! mb-0.5">
+                    arrow_back
+                </span>
+                Back to home
+            </a>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-end">
+                <div class="flex flex-col gap-1">
+                    <div class="flex gap-3 items-center">
+                        <div
+                            id="previous"
+                            class="flex items-center justify-center size-7 bg-white rounded border border-slate-200 hover:bg-slate-100 cursor-pointer select-none"
+                        >
+                            ‹
+                        </div>
+                        <p class="text-3xl font-semibold">
+                            Week <span id="week">1</span>
+                        </p>
+                        <div
+                            id="next"
+                            class="flex items-center justify-center size-7 bg-white rounded border border-slate-200 hover:bg-slate-100 cursor-pointer select-none"
+                        >
+                            ›
+                        </div>
+                    </div>
+                    <p class="text-slate-500 text-sm">From - Till</p>
+                </div>
+
+                <button
+                    id="submit"
+                    class="text-xs font-semibold h-fit py-2 px-3 text-white rounded-lg bg-indigo-500 hover:bg-indigo-600 cursor-pointer"
+                >
+                    <div class="flex items-center justify-center">
+                        <p>+ Add class</p>
+                    </div>
+                </button>
+            </div>
+
+            <div
+                class="border border-slate-200 rounded-lg bg-white w-full flex flex-col"
+            >
+                <div
+                    class="p-10 flex flex-col justify-center items-center gap-1"
+                >
+                    <p class="font-semibold">No classes yet</p>
+                    <p class="text-sm text-slate-500">
+                        Add each class you attended this week.
+                    </p>
+                </div>
+                <div
+                    class="border-top border-slate-200 bg-slate-50 p-3 rounded-b-lg"
+                >
+                    <div class="flex justify-between">
+                        <p class="text-xs text-slate-500">
+                            <span>0</span> classes
+                        </p>
+                        <p class="text-xs text-slate-500">
+                            Total
+                            <span class="font-bold text-slate-600">0 min</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
