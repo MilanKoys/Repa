@@ -1,21 +1,26 @@
 import { Component } from "../../component.js";
 import { AttendanceService } from "../../services/attendance.js";
+import { NavigationService } from "../../services/navigation.js";
 
 type Nullable<T> = null | T;
 
 const STORAGE_WEEK_KEY: string = "week";
 const BASE_WEEK_STRING: string = "1";
 
+const DASHBOARD_PATH: string = "home";
+
 const ONE: 1 = 1;
 
 const CLICK_EVENT: string = "click";
 
 export class RecordComponent extends Component {
+  private navigationService = NavigationService.inject();
   private attendanceService = AttendanceService.inject();
 
   private week: Nullable<HTMLElement> = null;
   private next: Nullable<HTMLElement> = null;
   private previous: Nullable<HTMLElement> = null;
+  private back: Nullable<HTMLElement> = null;
 
   constructor() {
     super();
@@ -27,6 +32,12 @@ export class RecordComponent extends Component {
   }
 
   private bindNavigation() {
+    if (this.back) {
+      this.back.addEventListener(CLICK_EVENT, () => {
+        this.navigationService.navigate(DASHBOARD_PATH);
+      });
+    }
+
     if (this.next) {
       this.next.addEventListener(CLICK_EVENT, () => {
         const weekNumber: number = this.loadWeek();
@@ -63,6 +74,7 @@ export class RecordComponent extends Component {
     this.week = this.document.querySelector("#week");
     this.next = this.document.querySelector("#next");
     this.previous = this.document.querySelector("#previous");
+    this.back = this.document.querySelector("#back");
 
     const weekNumber = this.loadWeek();
 
