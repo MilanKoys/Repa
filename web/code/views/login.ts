@@ -92,17 +92,14 @@ if (submitElement) {
       return;
     }
 
-    authService
-      .login(email, password)
-      .then((response) => {
+    authService.login(email, password).then((response) => {
+      if (response.ok) {
         toggleLoading(false);
         location.href = SIGN_IN_REDIRECT;
-      })
-      .catch((error) => {
-        if (error) {
-          toggleLoading(false);
-          toggleError(true);
-        }
-      });
+      } else {
+        toggleLoading(false);
+        toggleError(true);
+      }
+    });
   });
 }
