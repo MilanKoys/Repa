@@ -1,8 +1,12 @@
 import { Component } from "../../component.js";
 import { AttendanceService } from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
+import type { EntryComponent } from "../entry/entry.js";
 
 type Nullable<T> = null | T;
+
+const ENTRY_OPEN_ATTRIBUTE: string = "open";
+const ENTRY_OPEN_VALUE: string = "true";
 
 const STORAGE_WEEK_KEY: string = "week";
 const BASE_WEEK_STRING: string = "1";
@@ -21,6 +25,8 @@ export class RecordComponent extends Component {
   private next: Nullable<HTMLElement> = null;
   private previous: Nullable<HTMLElement> = null;
   private back: Nullable<HTMLElement> = null;
+  private add: Nullable<HTMLElement> = null;
+  private entry: Nullable<EntryComponent> = null;
 
   constructor() {
     super();
@@ -55,6 +61,13 @@ export class RecordComponent extends Component {
         this.setWeek(newWeekNumber);
       });
     }
+
+    if (this.add) {
+      const entry = this.entry;
+      this.add.addEventListener(CLICK_EVENT, () => {
+        if (entry) entry.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
+      });
+    }
   }
 
   private setWeek(weekNumber: number) {
@@ -75,6 +88,8 @@ export class RecordComponent extends Component {
     this.next = this.document.querySelector("#next");
     this.previous = this.document.querySelector("#previous");
     this.back = this.document.querySelector("#back");
+    this.add = this.document.querySelector("#add");
+    this.entry = this.document.querySelector("#entry");
 
     const weekNumber = this.loadWeek();
 

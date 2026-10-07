@@ -1,0 +1,62 @@
+<div id="content" class="absolute top-0 left-0 hidden">
+    <div class="w-dvw h-dvh bg-black/20 flex justify-center items-center">
+        <div
+            class="border border-slate-200 rounded-xl bg-white p-6 flex flex-col min-w-md gap-4"
+        >
+            <div class="flex justify-between items-center">
+                <div class="flex flex-col">
+                    <p class="text-lg font-semibold">Add class</p>
+                    <p class="text-xs text-slate-500">
+                        Week 34 · 17 Aug – 23 Aug 2026
+                    </p>
+                </div>
+                <div
+                    id="close"
+                    class="flex text-xl items-center justify-center size-7 bg-white text-slate-500 rounded hover:bg-slate-100 cursor-pointer select-none"
+                >
+                    ×
+                </div>
+            </div>
+            <div class="flex flex-col gap-3">
+                <div class="flex gap-3">
+                    <input-text-component
+                        id="type"
+                        placeholder="ZIW"
+                        label="Class"
+                    ></input-text-component>
+                    <div class="flex">
+                        <input-text-component
+                            id="duration"
+                            placeholder="45"
+                            type="number"
+                            label="Duration"
+                        ></input-text-component>
+                    </div>
+                </div>
+                <input-text-component
+                    id="about"
+                    placeholder="What was covered"
+                    label="Description"
+                ></input-text-component>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button
+                    id="cancel"
+                    class="text-sm h-fit py-2 px-3 bg-white border rounded-lg border-slate-200 hover:bg-slate-50 cursor-pointer"
+                >
+                    <div class="flex items-center justify-center">
+                        <p>Cancel</p>
+                    </div>
+                </button>
+                <button
+                    id="submit"
+                    class="text-sm font-semibold h-fit py-2 px-3 text-white rounded-lg bg-indigo-500 hover:bg-indigo-600 cursor-pointer"
+                >
+                    <div class="flex items-center justify-center">
+                        <p>Add class</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
