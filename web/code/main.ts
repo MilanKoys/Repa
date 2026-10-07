@@ -7,6 +7,7 @@ import { liveReload } from "./live-reload.js";
 import { LeafComponent } from "./components/leaf/leaf.js";
 import { RecordComponent } from "./components/record/record.js";
 import { DashboardComponent } from "./components/dashboard/dashboard.js";
+import { DetailComponent } from "./components/detail/detail.js";
 import { EntryComponent } from "./components/entry/entry.js";
 
 const WS_PORT: number = 3000;
@@ -22,4 +23,5 @@ customElements.define("weeks-component", WeeksComponent);
 customElements.define("leaf-component", LeafComponent);
 customElements.define("record-component", RecordComponent);
 customElements.define("dashboard-component", DashboardComponent);
+customElements.define("detail-component", DetailComponent);
 customElements.define("entry-component", EntryComponent);
