@@ -1,20 +1,9 @@
 import { Component } from "../../component.js";
-import { API_URL } from "../../constants/api.js";
+import { AttendanceService } from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
 import { LeafStatus } from "../leaf/leaf.js";
 
 type Nullable<T> = null | T;
-type Undefined<T> = undefined | T;
-
-interface ActiveLeaf {
-  season: Nullable<Leaf>;
-}
-
-interface Leaf {
-  id: string;
-  active: boolean;
-  start: number;
-}
 
 const ZERO: number = 0;
 const ONE: number = 1;
@@ -22,7 +11,6 @@ const EMPTY_STRING: string = "";
 
 const CLICK_EVENT: string = "click";
 
-const ACTIVE_SEASON_PATH: string = "/season/active";
 const ATTENDANCE_PATH: string = "attendance";
 
 const HIDDEN_CLASS: string = "hidden";
@@ -52,6 +40,7 @@ const BASE_COUNT_INDEX: number = 0;
 
 export class WeeksComponent extends Component {
   private navigationService: NavigationService = NavigationService.inject();
+  private attendanceService: AttendanceService = AttendanceService.inject();
 
   private weeks: Nullable<HTMLElement> = null;
   private previous: Nullable<HTMLElement> = null;
@@ -60,7 +49,6 @@ export class WeeksComponent extends Component {
   private range: Nullable<HTMLElement> = null;
 
   private page: number = 0;
-  private leaf: Undefined<ActiveLeaf>;
   private leafStart: Nullable<number> = null;
 
   constructor() {
@@ -78,8 +66,8 @@ export class WeeksComponent extends Component {
   }
 
   private async calculateActions() {
-    const leaf = await this.loadLeaf();
-    if (!leaf.season) return;
+    const leaf = this.attendanceService.leaf;
+    if (!leaf || !leaf.season) return;
     const leafStart: number = leaf.season.start;
     const adder: number = WEEK_MILLISECONDS * LEAF_COUNT;
     const startDate: number = this.leafStart ?? leaf.season.start;
@@ -190,7 +178,6 @@ export class WeeksComponent extends Component {
   private async scrollLast() {
     let next = await this.executeNext();
     while (next) {
-      if (this.weeks) this.weeks.innerHTML = EMPTY_STRING;
       next = await this.executeNext();
     }
   }
@@ -212,6 +199,7 @@ export class WeeksComponent extends Component {
     this.last = this.document.querySelector("#last");
     this.range = this.document.querySelector("#range");
 
+    await this.attendanceService.initialized;
     this.initialRender();
     this.bindEvents();
   }
@@ -283,18 +271,9 @@ export class WeeksComponent extends Component {
 
   protected async renderWeeks() {
     if (this.weeks) this.weeks.innerHTML = EMPTY_STRING;
-    const leaf = await this.loadLeaf();
-    if (!leaf.season) return;
+    const leaf = this.attendanceService.leaf;
+    if (!leaf || !leaf.season) return;
     this.renderRange(this.leafStart ?? leaf.season.start);
     this.renderLeaves(this.leafStart ?? leaf.season.start);
-  }
-
-  protected async loadLeaf(): Promise<ActiveLeaf> {
-    const leaf: Undefined<ActiveLeaf> = this.leaf;
-    if (leaf) return new Promise((resolve) => resolve(leaf));
-    const request: Response = await fetch(`${API_URL}${ACTIVE_SEASON_PATH}`);
-    const activeSeason: ActiveLeaf = await request.json();
-    this.leaf = activeSeason;
-    return activeSeason;
   }
 }
