@@ -1,9 +1,12 @@
 import { Component } from "../../component.js";
+import type { InputTextComponent } from "../input-text/input-text.js";
 
 const HIDDEN_CLASS: string = "hidden";
 
 const CLICK_EVENT: string = "click";
 const CHANGE_EVENT: string = "change";
+
+const EMPTY_STRING: string = "";
 
 const OPEN_NAME: string = "open";
 
@@ -15,9 +18,9 @@ export class EntryComponent extends Component {
   private cancel: HTMLElement | null = null;
   private submit: HTMLElement | null = null;
 
-  private typeInput: HTMLElement | null = null;
-  private durationInput: HTMLElement | null = null;
-  private aboutInput: HTMLElement | null = null;
+  private typeInput: InputTextComponent | null = null;
+  private durationInput: InputTextComponent | null = null;
+  private aboutInput: InputTextComponent | null = null;
 
   private type: string = "";
   private duration: string = "";
@@ -70,6 +73,8 @@ export class EntryComponent extends Component {
         this.dispatchCustomEvent(CHANGE_EVENT, {
           detail: { type, duration, about },
         });
+
+        this.reset();
       });
     }
   }
@@ -84,6 +89,16 @@ export class EntryComponent extends Component {
     this.submit = this.document.querySelector("#submit");
 
     this.bindEvents();
+  }
+
+  public reset() {
+    if (this.typeInput) this.typeInput.clear();
+    if (this.durationInput) this.durationInput.clear();
+    if (this.aboutInput) this.aboutInput.clear();
+
+    this.type = EMPTY_STRING;
+    this.duration = EMPTY_STRING;
+    this.about = EMPTY_STRING;
   }
 
   async attributeChangedCallback(

@@ -78,6 +78,10 @@ export class InputTextComponent extends Component {
     this.loadTemplate("/components/input-text/input-text.html");
   }
 
+  public clear() {
+    if (this.input) this.input.value = EMPTY_STRING;
+  }
+
   async attributeChangedCallback(
     name: string,
     _oldValue: string,
