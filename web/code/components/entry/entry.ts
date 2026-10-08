@@ -48,7 +48,7 @@ export class EntryComponent extends Component {
         const realhours: string = hours ? `${hourString}` : EMPTY_STRING;
 
         if (this.duration) {
-          this.duration.textContent = `${hourString}  ${minutes}`;
+          this.duration.textContent = `${realhours}  ${minutes}`;
         }
         break;
     }
