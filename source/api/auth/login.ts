@@ -10,7 +10,7 @@ import type { Collection } from "mongodb";
 import { scryptSync } from "node:crypto";
 
 import { Server } from "#server";
-import { CollectionName, Method } from "#enums";
+import { Collections, Method } from "#enums";
 import { Validator } from "#validator";
 import { Database } from "#database";
 import { Session } from "#session";
@@ -50,7 +50,7 @@ const loginHandler = async (
     return response.outgoingMessage.end();
   }
 
-  const users: Collection<User> = database.collection(CollectionName.Users);
+  const users: Collection<User> = database.collection(Collections.Users);
 
   const foundUser = await users.findOne({ email: body.email });
 

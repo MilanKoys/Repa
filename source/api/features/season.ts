@@ -11,7 +11,7 @@ import type {
 } from "@types";
 
 import { Server } from "#server";
-import { CollectionName, Method, Role } from "#enums";
+import { Collections, Method, ReportStatus, Role } from "#enums";
 import { Database } from "#database";
 import { UserLibrary } from "#library";
 import { Validator } from "#validator";
@@ -22,7 +22,7 @@ const VERIFIED_ROLES: Role[] = [Role.Admin, Role.Teacher];
 const database: Database = Database.init();
 const userLibrary: UserLibrary = UserLibrary.inject();
 
-const seasonRouter: Server = new Server();
+export const seasonRouter: Server = new Server();
 
 const activePath: string = "/active";
 const seasonPath: string = "/season";
@@ -57,7 +57,7 @@ const activeSeasonHandler = async (
     return response.outgoingMessage.end();
   }
 
-  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
 
   const season = await seasons.findOne({ active: true });
 
@@ -77,7 +77,7 @@ const listSeasonHandler = async (
     return response.outgoingMessage.end();
   }
 
-  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
 
   const seasonList = await seasons.find().toArray();
 
@@ -111,7 +111,7 @@ const createSeasonHandler = async (
     return response.outgoingMessage.end();
   }
 
-  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
 
   const newLeaf: Leaf = {
     id: randomUUID(),
@@ -151,7 +151,7 @@ const deleteSeasonHandler = async (
     return response.outgoingMessage.end();
   }
 
-  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
 
   const result: DeleteResult = await seasons.deleteOne(body);
 
@@ -185,7 +185,7 @@ const setSeasonHandler = async (
     return response.outgoingMessage.end();
   }
 
-  const seasons: Collection<Leaf> = database.collection(CollectionName.Seasons);
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
 
   const filter = { id: body.id };
   const update = { $set: { active: body.active } };
@@ -201,5 +201,3 @@ seasonRouter.route(Method.Delete, seasonPath, deleteSeasonHandler);
 seasonRouter.route(Method.Put, seasonPath, setSeasonHandler);
 
 seasonRouter.route(Method.Get, activeSeasonPath, activeSeasonHandler);
-
-export default seasonRouter;

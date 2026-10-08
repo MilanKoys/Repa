@@ -9,5 +9,3 @@ export const authRouter: Server = new Server();
 const authPath = "/auth";
 
 authRouter.join(authPath, registerRouter, loginRouter, userProfileRouter);
-
-export default authRouter;

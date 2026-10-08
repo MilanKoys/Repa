@@ -2,10 +2,10 @@ import type { Token, Undefined, User } from "@types";
 import type { Collection } from "mongodb";
 
 import { Database } from "#database";
-import { CollectionName, Role } from "#enums";
+import { Collections, Role } from "#enums";
 import { Session } from "#session";
 
-const USERS_COLLECTION: CollectionName = CollectionName.Users;
+const USERS_COLLECTION: Collections = Collections.Users;
 
 export class UserLibrary {
   private static instance: Undefined<UserLibrary>;
