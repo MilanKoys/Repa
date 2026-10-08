@@ -4,6 +4,10 @@ const TYPE_NAME: string = "type";
 const ABOUT_NAME: string = "about";
 const DURATION_NAME: string = "duration";
 
+const HOUR_STRING: string = "h";
+const ONE_HOUR_MINUTES: number = 60;
+const EMPTY_STRING: string = "";
+
 export class EntryComponent extends Component {
   static observedAttributes = [TYPE_NAME, ABOUT_NAME, DURATION_NAME];
 
@@ -37,7 +41,15 @@ export class EntryComponent extends Component {
         if (this.about) this.about.textContent = newValue;
         break;
       case DURATION_NAME:
-        if (this.duration) this.duration.textContent = newValue;
+        const fullMinutes: number = parseInt(newValue);
+        const hours: number = Math.floor(fullMinutes / ONE_HOUR_MINUTES);
+        const minutes: number = fullMinutes - ONE_HOUR_MINUTES * hours;
+        const hourString: string = `${hours} ${HOUR_STRING}`;
+        const realhours: string = hours ? `${hourString}` : EMPTY_STRING;
+
+        if (this.duration) {
+          this.duration.textContent = `${hourString}  ${minutes}`;
+        }
         break;
     }
   }

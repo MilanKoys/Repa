@@ -2,7 +2,6 @@ import { Component } from "../../component.js";
 import { AttendanceService } from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
 import type { DetailComponent } from "../detail/detail.js";
-import type { EntryComponent } from "../entry/entry.js";
 
 type Nullable<T> = null | T;
 
@@ -28,6 +27,11 @@ const ENTRY_OPEN_VALUE: string = "true";
 const STORAGE_WEEK_KEY: string = "week";
 const BASE_WEEK_STRING: string = "1";
 
+const HOUR_STRING: string = "h";
+const MINUTE_STRING: string = "min";
+const DEFAULT_TIME_STING: string = "0";
+const ONE_HOUR_MINUTES: number = 60;
+
 const DASHBOARD_PATH: string = "home";
 
 const ONE: 1 = 1;
@@ -49,6 +53,7 @@ export class RecordComponent extends Component {
   private empty: Nullable<HTMLElement> = null;
   private content: Nullable<HTMLElement> = null;
   private time: Nullable<HTMLElement> = null;
+  private count: Nullable<HTMLElement> = null;
 
   private entries: Entry[] = [];
 
@@ -57,11 +62,51 @@ export class RecordComponent extends Component {
     this.loadTemplate("/components/record/record.html");
   }
 
+  private handleEntryEdit(entryElement: HTMLElement, entry: Entry) {
+    entryElement.addEventListener(CLICK_EVENT, () => {
+      const identifier = entryElement.getAttribute(ENTRY_ID_ATTRIBUTE);
+
+      if (this.detail && identifier) {
+        this.detail.setAttribute(ENTRY_ID_ATTRIBUTE, identifier);
+        this.detail.setDetail(entry.type, entry.about, entry.duration);
+        this.detail.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
+      }
+    });
+  }
+
+  private renderTime() {
+    if (!this.entries.length && this.time) {
+      this.time.textContent = `${DEFAULT_TIME_STING} ${MINUTE_STRING}`;
+      return;
+    }
+
+    const fullMinutes = this.entries
+      .map((entry) => {
+        return parseInt(entry.duration);
+      })
+      .reduce((previousValue, nextValue) => {
+        previousValue += nextValue;
+        return previousValue;
+      });
+
+    const hours: number = Math.floor(fullMinutes / ONE_HOUR_MINUTES);
+    const minutes: number = fullMinutes - ONE_HOUR_MINUTES * hours;
+    const hourString: string = hours ? `${hours} ${HOUR_STRING}` : EMPTY_STRING;
+
+    if (this.time) {
+      this.time.textContent = `${hourString}  ${minutes} ${MINUTE_STRING}`;
+    }
+  }
+
   private renderEntries() {
     const empty = this.empty;
     const content = this.content;
 
+    if (this.count) this.count.textContent = this.entries.length.toString();
+
     if (!empty || !content) return;
+
+    this.renderTime();
 
     if (!this.entries.length) {
       content.classList.add(HIDDEN_CLASS);
@@ -79,15 +124,7 @@ export class RecordComponent extends Component {
       entryElement.setAttribute(ENTRY_DURATION_ATTRIBUTE, entry.duration);
       entryElement.setAttribute(ENTRY_ID_ATTRIBUTE, index.toString());
 
-      entryElement.addEventListener(CLICK_EVENT, () => {
-        const identifier = entryElement.getAttribute(ENTRY_ID_ATTRIBUTE);
-
-        if (this.detail && identifier) {
-          this.detail.setAttribute(ENTRY_ID_ATTRIBUTE, identifier);
-          this.detail.setDetail(entry.type, entry.about, entry.duration);
-          this.detail.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
-        }
-      });
+      this.handleEntryEdit(entryElement, entry);
 
       content.appendChild(entryElement);
     });
@@ -105,22 +142,26 @@ export class RecordComponent extends Component {
     this.renderEntries();
   }
 
+  private handleEntrySubmit(detail: DetailComponent, entry: Entry) {
+    const identifier = detail.getAttribute(ENTRY_ID_ATTRIBUTE);
+
+    if (identifier) {
+      const identifierNumber: number = parseInt(identifier);
+      this.entries.splice(identifierNumber, ONE, entry);
+      detail.removeAttribute(ENTRY_ID_ATTRIBUTE);
+    } else {
+      this.entries.push(entry);
+    }
+
+    this.renderEntries();
+  }
+
   private bindEvents() {
     const detail = this.detail;
     if (detail) {
       detail.addEventListener(SUBMIT_EVENT, (event: Event) => {
-        const identifier = detail.getAttribute(ENTRY_ID_ATTRIBUTE);
         const customEvent: CustomEvent = event as CustomEvent;
-
-        if (identifier) {
-          const identifierNumber: number = parseInt(identifier);
-          this.entries.splice(identifierNumber, ONE, customEvent.detail);
-          detail.removeAttribute(ENTRY_ID_ATTRIBUTE);
-        } else {
-          this.entries.push(customEvent.detail);
-        }
-
-        this.renderEntries();
+        this.handleEntrySubmit(detail, customEvent.detail);
       });
 
       detail.addEventListener(DELETE_EVENT, (event: Event) => {
@@ -190,6 +231,7 @@ export class RecordComponent extends Component {
     this.empty = this.document.querySelector("#empty");
     this.content = this.document.querySelector("#content");
     this.time = this.document.querySelector("#time");
+    this.count = this.document.querySelector("#count");
 
     const weekNumber = this.loadWeek();
 

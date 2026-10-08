@@ -145,6 +145,7 @@ export class DetailComponent extends Component {
     if (this.typeInput) this.typeInput.clear();
     if (this.durationInput) this.durationInput.clear();
     if (this.aboutInput) this.aboutInput.clear();
+    this.removeAttribute(IDENTIFIER_NAME);
 
     this.type = EMPTY_STRING;
     this.duration = EMPTY_STRING;
