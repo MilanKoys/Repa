@@ -80,6 +80,7 @@ const getAttendanceHandler = async (
   if (report) {
     response.json(report);
   } else {
+    response.outgoingMessage.statusCode = 404;
     response.outgoingMessage.end();
   }
 };

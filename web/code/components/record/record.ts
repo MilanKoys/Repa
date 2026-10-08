@@ -252,10 +252,11 @@ export class RecordComponent extends Component {
     }
   }
 
-  private setWeek(weekNumber: number) {
+  private async setWeek(weekNumber: number) {
     sessionStorage.setItem(STORAGE_WEEK_KEY, weekNumber.toString());
-    this.renderDate(weekNumber);
     this.reset();
+    await this.loadEntries(weekNumber);
+    this.renderDate(weekNumber);
     this.renderWeek(weekNumber);
   }
 
@@ -263,6 +264,23 @@ export class RecordComponent extends Component {
     const storedWeekString = sessionStorage.getItem(STORAGE_WEEK_KEY);
     const storedWeek: number = parseInt(storedWeekString ?? BASE_WEEK_STRING);
     return storedWeek;
+  }
+
+  private async loadEntries(weekNumber: number) {
+    const report = await this.attendanceService.fetchRecord(weekNumber);
+
+    if (report) {
+      const reports = report.rows.map((row) => {
+        return {
+          type: row.type,
+          about: row.about ?? "",
+          duration: row.duration.toString(),
+        };
+      });
+
+      this.entries = reports;
+      this.renderEntries();
+    }
   }
 
   protected async templateLoaded() {
@@ -282,6 +300,7 @@ export class RecordComponent extends Component {
 
     const weekNumber = this.loadWeek();
 
+    await this.loadEntries(weekNumber);
     this.renderWeek(weekNumber);
     this.renderDate(weekNumber);
     this.bindNavigation();

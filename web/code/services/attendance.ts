@@ -3,6 +3,13 @@ import { API_URL } from "../constants/api.js";
 type Undefined<T> = undefined | T;
 type Nullable<T> = null | T;
 
+export enum ReportStatus {
+  Draft = "draft",
+  Submitted = "submitted",
+  Approved = "approved",
+  Rejected = "rejected",
+}
+
 interface ActiveLeaf {
   season: Nullable<Leaf>;
 }
@@ -13,12 +20,36 @@ interface Leaf {
   start: number;
 }
 
+export interface ReportRow {
+  type: string;
+  about: Undefined<string>;
+  duration: number;
+  comment?: string;
+}
+
+export interface CreateReport {
+  rows: ReportRow[];
+  week: number;
+}
+
+export interface Report {
+  rows: ReportRow[];
+  week: number;
+  season: string;
+  user: string;
+  status: ReportStatus;
+  comment?: string;
+}
+
 const DEFAULT_WEEK: number = 1;
 const WEEK_ADDED: number = 1;
 const WEEK_MILLISECONDS: number = 604800000;
 const BASE_COUNT_INDEX: number = 0;
 
+const ATTENDANCE_PATH: string = "/attendance";
 const ACTIVE_SEASON_PATH: string = "/season/active";
+
+const WEEK_HEADER: string = "week";
 
 export class AttendanceService {
   private static instance: Undefined<AttendanceService>;
@@ -56,6 +87,18 @@ export class AttendanceService {
     this.leaf = leaf;
     this.initialize();
     return leaf;
+  }
+
+  public async fetchRecord(week: number): Promise<Nullable<Report>> {
+    const response: Response = await fetch(ATTENDANCE_PATH, {
+      headers: { week: week.toString() },
+    });
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      return null;
+    }
   }
 
   public static inject() {
