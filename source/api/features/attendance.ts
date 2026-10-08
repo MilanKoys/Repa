@@ -42,6 +42,48 @@ function containsStatus(report: Report, statuses: ReportStatus[]) {
   return statuses.some((status) => status === report.status);
 }
 
+const getAttendanceHandler = async (
+  request: ServerRequest,
+  response: ServerResponse,
+) => {
+  const weekNumber = request.incomingMessage.headers.week;
+
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  if (!weekNumber || typeof weekNumber !== "string") {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
+  const reports: Collection<Report> = database.collection(Collections.Reports);
+
+  const season = await seasons.findOne({ active: true });
+
+  if (!season) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const report = await reports.findOne({
+    week: parseInt(weekNumber),
+    season: season.id,
+  });
+
+  if (report) {
+    response.json(report);
+  } else {
+    response.outgoingMessage.end();
+  }
+};
+
 const saveAttendanceHandler = async (
   request: ServerRequest,
   response: ServerResponse,
@@ -103,3 +145,4 @@ const saveAttendanceHandler = async (
 };
 
 attendanceRouter.route(Method.Post, attendancePath, saveAttendanceHandler);
+attendanceRouter.route(Method.Get, attendancePath, getAttendanceHandler);
