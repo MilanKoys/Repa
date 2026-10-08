@@ -12,9 +12,19 @@ const EMPTY_STRING: string = "";
 
 const IDENTIFIER_NAME: string = "identifier";
 const OPEN_NAME: string = "open";
+const DATE_NAME: string = "date";
+const WEEK_NAME: string = "week";
+
+const EDIT_HEADER: string = "Edit class";
+const ADD_HEADER: string = "Add class";
 
 export class DetailComponent extends Component {
-  static observedAttributes = [OPEN_NAME, IDENTIFIER_NAME];
+  static observedAttributes = [
+    OPEN_NAME,
+    IDENTIFIER_NAME,
+    DATE_NAME,
+    WEEK_NAME,
+  ];
 
   private content: HTMLElement | null = null;
   private close: HTMLElement | null = null;
@@ -22,6 +32,9 @@ export class DetailComponent extends Component {
   private submit: HTMLElement | null = null;
   private error: HTMLElement | null = null;
   private delete: HTMLElement | null = null;
+  private header: HTMLElement | null = null;
+  private date: HTMLElement | null = null;
+  private week: HTMLElement | null = null;
 
   private typeInput: InputTextComponent | null = null;
   private durationInput: InputTextComponent | null = null;
@@ -126,6 +139,9 @@ export class DetailComponent extends Component {
     this.submit = this.document.querySelector("#submit");
     this.error = this.document.querySelector("#error");
     this.delete = this.document.querySelector("#delete");
+    this.header = this.document.querySelector("#header");
+    this.date = this.document.querySelector("#date");
+    this.week = this.document.querySelector("#week");
 
     this.bindEvents();
   }
@@ -160,12 +176,29 @@ export class DetailComponent extends Component {
     await this.initialized;
 
     switch (name) {
+      case WEEK_NAME:
+        if (this.week) this.week.textContent = newValue;
+        break;
+      case DATE_NAME:
+        if (this.date) this.date.textContent = newValue;
+        break;
       case OPEN_NAME:
         if (this.content) {
           if (newValue) {
             this.content.classList.remove(HIDDEN_CLASS);
           } else {
             this.content.classList.add(HIDDEN_CLASS);
+          }
+        }
+        break;
+      case IDENTIFIER_NAME:
+        if (this.header && this.delete) {
+          if (newValue) {
+            this.delete.classList.remove(HIDDEN_CLASS);
+            this.header.textContent = EDIT_HEADER;
+          } else {
+            this.delete.classList.add(HIDDEN_CLASS);
+            this.header.textContent = ADD_HEADER;
           }
         }
         break;

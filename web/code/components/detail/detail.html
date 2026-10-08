@@ -5,9 +5,10 @@
         >
             <div class="flex justify-between items-center">
                 <div class="flex flex-col">
-                    <p class="text-lg font-semibold">Add class</p>
+                    <p id="header" class="text-lg font-semibold">Add class</p>
                     <p class="text-xs text-slate-500">
-                        Week 34 · 17 Aug – 23 Aug 2026
+                        Week <span id="week">-</span> ·
+                        <span id="date">From – Till</span>
                     </p>
                 </div>
                 <div
@@ -40,14 +41,16 @@
             </div>
             <p id="error" class="text-red-400 text-sm hidden">Error</p>
             <div class="flex justify-between gap-2">
-                <button
-                    id="delete"
-                    class="text-sm h-fit py-2 px-3 bg-red-100 border rounded-lg hover:bg-red-200 border-red-100 text-red-400 cursor-pointer"
-                >
-                    <div class="flex items-center justify-center">
-                        <p>Delete</p>
-                    </div>
-                </button>
+                <div>
+                    <button
+                        id="delete"
+                        class="text-sm hidden h-fit py-2 px-3 bg-red-100 border rounded-lg hover:bg-red-200 border-red-100 text-red-400 cursor-pointer"
+                    >
+                        <div class="flex items-center justify-center">
+                            <p>Delete</p>
+                        </div>
+                    </button>
+                </div>
                 <div class="flex gap-2">
                     <button
                         id="cancel"

@@ -17,6 +17,9 @@ const ENTRY_ABOUT_ATTRIBUTE: string = "about";
 const ENTRY_DURATION_ATTRIBUTE: string = "duration";
 const ENTRY_ID_ATTRIBUTE: string = "identifier";
 
+const DETAIL_WEEK_ATTRIBUTE: string = "week";
+const DETAIL_DATE_ATTRIBUTE: string = "date";
+
 const HIDDEN_CLASS: string = "hidden";
 
 const EMPTY_STRING: string = "";
@@ -40,6 +43,13 @@ const CLICK_EVENT: string = "click";
 const SUBMIT_EVENT: string = "submit";
 const DELETE_EVENT: string = "delete";
 
+const WEEK_MILLISECONDS: number = 604800000;
+
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
+const DATE_FORMAT: string = "default";
+const MONTH_START: number = 0;
+const MONTH_END: number = 3;
+
 export class RecordComponent extends Component {
   private navigationService = NavigationService.inject();
   private attendanceService = AttendanceService.inject();
@@ -54,6 +64,7 @@ export class RecordComponent extends Component {
   private content: Nullable<HTMLElement> = null;
   private time: Nullable<HTMLElement> = null;
   private count: Nullable<HTMLElement> = null;
+  private date: Nullable<HTMLElement> = null;
 
   private entries: Entry[] = [];
 
@@ -135,6 +146,9 @@ export class RecordComponent extends Component {
 
   private renderWeek(number: number) {
     if (this.week) this.week.textContent = `${number}`;
+    if (this.detail) {
+      this.detail.setAttribute(DETAIL_WEEK_ATTRIBUTE, `${number}`);
+    }
   }
 
   private reset() {
@@ -207,8 +221,40 @@ export class RecordComponent extends Component {
     }
   }
 
+  private getMontName(date: Date) {
+    return date.toLocaleString(DATE_FORMAT, DATE_FORMAT_OPTIONS);
+  }
+
+  private renderDate(weekNumber: number) {
+    const leaf = this.attendanceService.leaf;
+    if (!leaf || !leaf.season) return;
+    const startTime: number = leaf.season.start;
+
+    const weekTimeStart: number = (weekNumber - ONE) * WEEK_MILLISECONDS;
+    const weekTimeEnd: number = weekNumber * WEEK_MILLISECONDS;
+
+    const weekDateStart: Date = new Date(startTime + weekTimeStart);
+    const weekDateEnd: Date = new Date(startTime + weekTimeEnd);
+
+    const dateMonthStart = this.getMontName(weekDateStart);
+    const dateMonthStartSlice = dateMonthStart.slice(MONTH_START, MONTH_END);
+
+    const dateMonthEnd = this.getMontName(weekDateEnd);
+    const dateMonthEndSlice = dateMonthEnd.slice(MONTH_START, MONTH_END);
+
+    const dateStartString: string = `${weekDateStart.getDate()} ${dateMonthStartSlice}`;
+    const dateEndString: string = `${weekDateEnd.getDate()} ${dateMonthEndSlice} ${weekDateEnd.getFullYear()}`;
+
+    const dateString: string = `${dateStartString} - ${dateEndString}`;
+    if (this.date) this.date.textContent = dateString;
+    if (this.detail) {
+      this.detail.setAttribute(DETAIL_DATE_ATTRIBUTE, dateString);
+    }
+  }
+
   private setWeek(weekNumber: number) {
     sessionStorage.setItem(STORAGE_WEEK_KEY, weekNumber.toString());
+    this.renderDate(weekNumber);
     this.reset();
     this.renderWeek(weekNumber);
   }
@@ -232,10 +278,12 @@ export class RecordComponent extends Component {
     this.content = this.document.querySelector("#content");
     this.time = this.document.querySelector("#time");
     this.count = this.document.querySelector("#count");
+    this.date = this.document.querySelector("#date");
 
     const weekNumber = this.loadWeek();
 
     this.renderWeek(weekNumber);
+    this.renderDate(weekNumber);
     this.bindNavigation();
     this.bindEvents();
   }
