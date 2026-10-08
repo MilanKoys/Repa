@@ -6,19 +6,22 @@ const HIDDEN_CLASS: string = "hidden";
 const CLICK_EVENT: string = "click";
 const CHANGE_EVENT: string = "change";
 const SUBMIT_EVENT: string = "submit";
+const DELETE_EVENT: string = "delete";
 
 const EMPTY_STRING: string = "";
 
+const IDENTIFIER_NAME: string = "identifier";
 const OPEN_NAME: string = "open";
 
 export class DetailComponent extends Component {
-  static observedAttributes = [OPEN_NAME];
+  static observedAttributes = [OPEN_NAME, IDENTIFIER_NAME];
 
   private content: HTMLElement | null = null;
   private close: HTMLElement | null = null;
   private cancel: HTMLElement | null = null;
   private submit: HTMLElement | null = null;
   private error: HTMLElement | null = null;
+  private delete: HTMLElement | null = null;
 
   private typeInput: InputTextComponent | null = null;
   private durationInput: InputTextComponent | null = null;
@@ -79,6 +82,15 @@ export class DetailComponent extends Component {
       this.cancel.addEventListener(CLICK_EVENT, () => this.closeContent());
     }
 
+    if (this.delete) {
+      this.delete.addEventListener(CLICK_EVENT, () => {
+        this.dispatchCustomEvent(DELETE_EVENT, {
+          detail: this.getAttribute(IDENTIFIER_NAME),
+        });
+        this.closeContent();
+      });
+    }
+
     if (this.submit) {
       this.submit.addEventListener(CLICK_EVENT, () => {
         this.toggleError();
@@ -113,8 +125,19 @@ export class DetailComponent extends Component {
     this.cancel = this.document.querySelector("#cancel");
     this.submit = this.document.querySelector("#submit");
     this.error = this.document.querySelector("#error");
+    this.delete = this.document.querySelector("#delete");
 
     this.bindEvents();
+  }
+
+  public setDetail(type: string, about: string, duration: string) {
+    if (this.typeInput) this.typeInput.setValue(type);
+    if (this.durationInput) this.durationInput.setValue(duration);
+    if (this.aboutInput) this.aboutInput.setValue(about);
+
+    this.type = type;
+    this.duration = duration;
+    this.about = about;
   }
 
   public reset() {

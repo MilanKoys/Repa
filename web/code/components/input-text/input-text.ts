@@ -6,6 +6,7 @@ const TYPE_NAME: string = "type";
 const INVALID_NAME: string = "invalid";
 const LINK_TEXT_NAME: string = "link";
 const LINK_HREF_NAME: string = "href";
+const UPPERCASE_NAME: string = "uppercase";
 
 const CHANGE_EVENT: string = "change";
 const INPUT_EVENT: string = "input";
@@ -20,6 +21,7 @@ export class InputTextComponent extends Component {
     LINK_TEXT_NAME,
     LINK_HREF_NAME,
     INVALID_NAME,
+    UPPERCASE_NAME,
   ];
 
   private label: HTMLElement | null = null;
@@ -82,6 +84,10 @@ export class InputTextComponent extends Component {
     if (this.input) this.input.value = EMPTY_STRING;
   }
 
+  public setValue(value: string) {
+    if (this.input) this.input.value = value;
+  }
+
   async attributeChangedCallback(
     name: string,
     _oldValue: string,
@@ -110,6 +116,15 @@ export class InputTextComponent extends Component {
         break;
       case LINK_HREF_NAME:
         if (this.link) this.link.setAttribute(LINK_HREF_NAME, newValue);
+        break;
+      case UPPERCASE_NAME:
+        if (this.input) {
+          if (newValue) {
+            this.input.classList.add(UPPERCASE_NAME);
+          } else {
+            this.input.classList.remove(UPPERCASE_NAME);
+          }
+        }
         break;
     }
   }

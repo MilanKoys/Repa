@@ -16,6 +16,7 @@ const ENTRY_SELECTOR: string = "entry-component";
 const ENTRY_TYPE_ATTRIBUTE: string = "type";
 const ENTRY_ABOUT_ATTRIBUTE: string = "about";
 const ENTRY_DURATION_ATTRIBUTE: string = "duration";
+const ENTRY_ID_ATTRIBUTE: string = "identifier";
 
 const HIDDEN_CLASS: string = "hidden";
 
@@ -33,6 +34,7 @@ const ONE: 1 = 1;
 
 const CLICK_EVENT: string = "click";
 const SUBMIT_EVENT: string = "submit";
+const DELETE_EVENT: string = "delete";
 
 export class RecordComponent extends Component {
   private navigationService = NavigationService.inject();
@@ -46,6 +48,7 @@ export class RecordComponent extends Component {
   private add: Nullable<HTMLElement> = null;
   private empty: Nullable<HTMLElement> = null;
   private content: Nullable<HTMLElement> = null;
+  private time: Nullable<HTMLElement> = null;
 
   private entries: Entry[] = [];
 
@@ -68,12 +71,23 @@ export class RecordComponent extends Component {
 
     content.innerHTML = EMPTY_STRING;
 
-    this.entries.forEach((entry) => {
+    this.entries.forEach((entry, index) => {
       const entryElement = document.createElement(ENTRY_SELECTOR);
 
       entryElement.setAttribute(ENTRY_TYPE_ATTRIBUTE, entry.type);
       entryElement.setAttribute(ENTRY_ABOUT_ATTRIBUTE, entry.about);
       entryElement.setAttribute(ENTRY_DURATION_ATTRIBUTE, entry.duration);
+      entryElement.setAttribute(ENTRY_ID_ATTRIBUTE, index.toString());
+
+      entryElement.addEventListener(CLICK_EVENT, () => {
+        const identifier = entryElement.getAttribute(ENTRY_ID_ATTRIBUTE);
+
+        if (this.detail && identifier) {
+          this.detail.setAttribute(ENTRY_ID_ATTRIBUTE, identifier);
+          this.detail.setDetail(entry.type, entry.about, entry.duration);
+          this.detail.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
+        }
+      });
 
       content.appendChild(entryElement);
     });
@@ -88,15 +102,31 @@ export class RecordComponent extends Component {
 
   private reset() {
     this.entries = [];
+    this.renderEntries();
   }
 
   private bindEvents() {
-    if (this.detail) {
-      this.detail.addEventListener(SUBMIT_EVENT, (event: Event) => {
+    const detail = this.detail;
+    if (detail) {
+      detail.addEventListener(SUBMIT_EVENT, (event: Event) => {
+        const identifier = detail.getAttribute(ENTRY_ID_ATTRIBUTE);
         const customEvent: CustomEvent = event as CustomEvent;
-        this.entries.push(customEvent.detail);
+
+        if (identifier) {
+          const identifierNumber: number = parseInt(identifier);
+          this.entries.splice(identifierNumber, ONE, customEvent.detail);
+          detail.removeAttribute(ENTRY_ID_ATTRIBUTE);
+        } else {
+          this.entries.push(customEvent.detail);
+        }
+
         this.renderEntries();
-        console.log(this.entries);
+      });
+
+      detail.addEventListener(DELETE_EVENT, (event: Event) => {
+        const customEvent: CustomEvent = event as CustomEvent;
+        this.entries.splice(customEvent.detail, ONE);
+        this.renderEntries();
       });
     }
   }
@@ -114,6 +144,7 @@ export class RecordComponent extends Component {
         const newWeekNumber: number = weekNumber + ONE;
         if (newWeekNumber > this.attendanceService.weekAmount) return;
         this.setWeek(newWeekNumber);
+        this.reset();
       });
     }
 
@@ -123,13 +154,14 @@ export class RecordComponent extends Component {
         const newWeekNumber: number = weekNumber - ONE;
         if (newWeekNumber < ONE) return;
         this.setWeek(newWeekNumber);
+        this.reset();
       });
     }
 
     if (this.add) {
-      const entry = this.detail;
+      const detail = this.detail;
       this.add.addEventListener(CLICK_EVENT, () => {
-        if (entry) entry.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
+        if (detail) detail.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
       });
     }
   }
@@ -157,6 +189,7 @@ export class RecordComponent extends Component {
     this.add = this.document.querySelector("#add");
     this.empty = this.document.querySelector("#empty");
     this.content = this.document.querySelector("#content");
+    this.time = this.document.querySelector("#time");
 
     const weekNumber = this.loadWeek();
 

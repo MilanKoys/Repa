@@ -20,6 +20,7 @@
             <div class="flex flex-col gap-3">
                 <div class="grid sm:grid-cols-2 grid-cols-1 gap-3">
                     <input-text-component
+                        uppercase="true"
                         id="type"
                         placeholder="ZIW"
                         label="Class"
@@ -38,23 +39,33 @@
                 ></input-text-component>
             </div>
             <p id="error" class="text-red-400 text-sm hidden">Error</p>
-            <div class="flex justify-end gap-2">
+            <div class="flex justify-between gap-2">
                 <button
-                    id="cancel"
-                    class="text-sm h-fit py-2 px-3 bg-white border rounded-lg border-slate-200 hover:bg-slate-50 cursor-pointer"
+                    id="delete"
+                    class="text-sm h-fit py-2 px-3 bg-red-100 border rounded-lg hover:bg-red-200 border-red-100 text-red-400 cursor-pointer"
                 >
                     <div class="flex items-center justify-center">
-                        <p>Cancel</p>
+                        <p>Delete</p>
                     </div>
                 </button>
-                <button
-                    id="submit"
-                    class="text-sm font-semibold h-fit py-2 px-3 text-white rounded-lg bg-indigo-500 hover:bg-indigo-600 cursor-pointer"
-                >
-                    <div class="flex items-center justify-center">
-                        <p>Submit</p>
-                    </div>
-                </button>
+                <div class="flex gap-2">
+                    <button
+                        id="cancel"
+                        class="text-sm h-fit py-2 px-3 bg-white border rounded-lg border-slate-200 hover:bg-slate-50 cursor-pointer"
+                    >
+                        <div class="flex items-center justify-center">
+                            <p>Cancel</p>
+                        </div>
+                    </button>
+                    <button
+                        id="submit"
+                        class="text-sm font-semibold h-fit py-2 px-3 text-white rounded-lg bg-indigo-500 hover:bg-indigo-600 cursor-pointer"
+                    >
+                        <div class="flex items-center justify-center">
+                            <p>Submit</p>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
