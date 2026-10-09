@@ -4,6 +4,7 @@ type Undefined<T> = undefined | T;
 type Nullable<T> = null | T;
 
 export enum ReportStatus {
+  Empty = "empty",
   Draft = "draft",
   Submitted = "submitted",
   Approved = "approved",
@@ -40,6 +41,8 @@ export interface Report {
   status: ReportStatus;
   comment?: string;
 }
+
+const POST_METHOD: string = "POST";
 
 const DEFAULT_WEEK: number = 1;
 const WEEK_ADDED: number = 1;
@@ -87,6 +90,17 @@ export class AttendanceService {
     this.leaf = leaf;
     this.initialize();
     return leaf;
+  }
+
+  public async saveRecord(week: number, rows: ReportRow[]) {
+    const body = JSON.stringify({ week, rows });
+
+    const response: Response = await fetch(ATTENDANCE_PATH, {
+      method: POST_METHOD,
+      body,
+    });
+
+    return response;
   }
 
   public async fetchRecord(week: number): Promise<Nullable<Report>> {

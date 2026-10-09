@@ -1,5 +1,5 @@
 import { Component } from "../../component.js";
-import { AttendanceService } from "../../services/attendance.js";
+import { AttendanceService, ReportStatus } from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
 import type { DetailComponent } from "../detail/detail.js";
 
@@ -50,6 +50,20 @@ const DATE_FORMAT: string = "default";
 const MONTH_START: number = 0;
 const MONTH_END: number = 3;
 
+const STATUS_COLOR_EMPTY: string = "bg-slate-400";
+const STATUS_COLOR_DRAFT: string = "bg-indigo-500";
+const STATUS_COLOR_SUBMITTED: string = "bg-orange-500";
+const STATUS_COLOR_APPROVED: string = "bg-green-600";
+const STATUS_COLOR_REJECTED: string = "bg-red-500";
+
+const STATUS_COLOR_LIST: string[] = [
+  STATUS_COLOR_EMPTY,
+  STATUS_COLOR_DRAFT,
+  STATUS_COLOR_SUBMITTED,
+  STATUS_COLOR_REJECTED,
+  STATUS_COLOR_APPROVED,
+];
+
 export class RecordComponent extends Component {
   private navigationService = NavigationService.inject();
   private attendanceService = AttendanceService.inject();
@@ -65,6 +79,9 @@ export class RecordComponent extends Component {
   private time: Nullable<HTMLElement> = null;
   private count: Nullable<HTMLElement> = null;
   private date: Nullable<HTMLElement> = null;
+  private save: Nullable<HTMLElement> = null;
+  private dot: Nullable<HTMLElement> = null;
+  private status: Nullable<HTMLElement> = null;
 
   private entries: Entry[] = [];
 
@@ -106,6 +123,31 @@ export class RecordComponent extends Component {
 
     if (this.time) {
       this.time.textContent = `${hourString}  ${minutes} ${MINUTE_STRING}`;
+    }
+  }
+
+  private setStatus(status: ReportStatus) {
+    if (this.status) this.status.textContent = status;
+    STATUS_COLOR_LIST.forEach((statusColor) => {
+      if (this.dot) this.dot.classList.remove(statusColor);
+    });
+
+    switch (status) {
+      case ReportStatus.Empty:
+        if (this.dot) this.dot.classList.add(STATUS_COLOR_EMPTY);
+        break;
+      case ReportStatus.Draft:
+        if (this.dot) this.dot.classList.add(STATUS_COLOR_DRAFT);
+        break;
+      case ReportStatus.Submitted:
+        if (this.dot) this.dot.classList.add(STATUS_COLOR_SUBMITTED);
+        break;
+      case ReportStatus.Rejected:
+        if (this.dot) this.dot.classList.add(STATUS_COLOR_REJECTED);
+        break;
+      case ReportStatus.Approved:
+        if (this.dot) this.dot.classList.add(STATUS_COLOR_APPROVED);
+        break;
     }
   }
 
@@ -172,6 +214,8 @@ export class RecordComponent extends Component {
 
   private bindEvents() {
     const detail = this.detail;
+    const save = this.save;
+
     if (detail) {
       detail.addEventListener(SUBMIT_EVENT, (event: Event) => {
         const customEvent: CustomEvent = event as CustomEvent;
@@ -182,6 +226,22 @@ export class RecordComponent extends Component {
         const customEvent: CustomEvent = event as CustomEvent;
         this.entries.splice(customEvent.detail, ONE);
         this.renderEntries();
+      });
+    }
+
+    if (save) {
+      save.addEventListener(CLICK_EVENT, async () => {
+        const weekNumber: number = this.loadWeek();
+        const rows = this.entries.map((entry) => {
+          return {
+            type: entry.type,
+            duration: parseInt(entry.duration),
+            about: entry.about.length ? entry.about : undefined,
+          };
+        });
+
+        await this.attendanceService.saveRecord(weekNumber, rows);
+        this.setStatus(ReportStatus.Draft);
       });
     }
   }
@@ -255,6 +315,7 @@ export class RecordComponent extends Component {
   private async setWeek(weekNumber: number) {
     sessionStorage.setItem(STORAGE_WEEK_KEY, weekNumber.toString());
     this.reset();
+    this.setStatus(ReportStatus.Empty);
     await this.loadEntries(weekNumber);
     this.renderDate(weekNumber);
     this.renderWeek(weekNumber);
@@ -278,6 +339,7 @@ export class RecordComponent extends Component {
         };
       });
 
+      this.setStatus(report.status);
       this.entries = reports;
       this.renderEntries();
     }
@@ -297,6 +359,9 @@ export class RecordComponent extends Component {
     this.time = this.document.querySelector("#time");
     this.count = this.document.querySelector("#count");
     this.date = this.document.querySelector("#date");
+    this.save = this.document.querySelector("#save");
+    this.dot = this.document.querySelector("#dot");
+    this.status = this.document.querySelector("#status");
 
     const weekNumber = this.loadWeek();
 
