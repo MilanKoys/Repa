@@ -3,17 +3,26 @@ import { Component } from "../../component.js";
 const TYPE_NAME: string = "type";
 const ABOUT_NAME: string = "about";
 const DURATION_NAME: string = "duration";
+const READONLY_NAME: string = "readonly";
 
 const HOUR_STRING: string = "h";
 const ONE_HOUR_MINUTES: number = 60;
 const EMPTY_STRING: string = "";
 
+const CURSOR_CLASS: string = "cursor-pointer";
+
 export class EntryComponent extends Component {
-  static observedAttributes = [TYPE_NAME, ABOUT_NAME, DURATION_NAME];
+  static observedAttributes = [
+    TYPE_NAME,
+    ABOUT_NAME,
+    DURATION_NAME,
+    READONLY_NAME,
+  ];
 
   private type: HTMLElement | null = null;
   private about: HTMLElement | null = null;
   private duration: HTMLElement | null = null;
+  private shell: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -24,6 +33,7 @@ export class EntryComponent extends Component {
     this.type = this.document.querySelector("#type");
     this.about = this.document.querySelector("#about");
     this.duration = this.document.querySelector("#duration");
+    this.shell = this.document.querySelector("#shell");
   }
 
   async attributeChangedCallback(
@@ -39,6 +49,15 @@ export class EntryComponent extends Component {
         break;
       case ABOUT_NAME:
         if (this.about) this.about.textContent = newValue;
+        break;
+      case READONLY_NAME:
+        if (this.shell) {
+          if (newValue) {
+            this.shell.classList.remove(CURSOR_CLASS);
+          } else {
+            this.shell.classList.add(CURSOR_CLASS);
+          }
+        }
         break;
       case DURATION_NAME:
         const fullMinutes: number = parseInt(newValue);

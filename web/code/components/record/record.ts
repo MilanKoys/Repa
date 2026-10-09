@@ -11,11 +11,14 @@ interface Entry {
   about: string;
 }
 
+const TRUE_VALUE: string = "true";
+
 const ENTRY_SELECTOR: string = "entry-component";
 const ENTRY_TYPE_ATTRIBUTE: string = "type";
 const ENTRY_ABOUT_ATTRIBUTE: string = "about";
 const ENTRY_DURATION_ATTRIBUTE: string = "duration";
 const ENTRY_ID_ATTRIBUTE: string = "identifier";
+const ENTRY_READONLY_ATTRIBUTE: string = "readonly";
 
 const DETAIL_WEEK_ATTRIBUTE: string = "week";
 const DETAIL_DATE_ATTRIBUTE: string = "date";
@@ -68,6 +71,8 @@ export class RecordComponent extends Component {
   private navigationService = NavigationService.inject();
   private attendanceService = AttendanceService.inject();
 
+  private readonly: boolean = false;
+
   private detail: Nullable<DetailComponent> = null;
   private week: Nullable<HTMLElement> = null;
   private next: Nullable<HTMLElement> = null;
@@ -83,6 +88,7 @@ export class RecordComponent extends Component {
   private dot: Nullable<HTMLElement> = null;
   private status: Nullable<HTMLElement> = null;
   private submit: Nullable<HTMLElement> = null;
+  private done: Nullable<HTMLElement> = null;
 
   private entries: Entry[] = [];
 
@@ -101,6 +107,22 @@ export class RecordComponent extends Component {
         this.detail.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
       }
     });
+  }
+
+  private setReadonly(toggle: boolean) {
+    if (toggle) {
+      this.readonly = true;
+      if (this.add) this.add.classList.add(HIDDEN_CLASS);
+      if (this.submit) this.submit.classList.add(HIDDEN_CLASS);
+      if (this.save) this.save.classList.add(HIDDEN_CLASS);
+      if (this.done) this.done.classList.remove(HIDDEN_CLASS);
+    } else {
+      this.readonly = false;
+      if (this.add) this.add.classList.remove(HIDDEN_CLASS);
+      if (this.submit) this.submit.classList.remove(HIDDEN_CLASS);
+      if (this.save) this.save.classList.remove(HIDDEN_CLASS);
+      if (this.done) this.done.classList.add(HIDDEN_CLASS);
+    }
   }
 
   private renderTime() {
@@ -142,6 +164,7 @@ export class RecordComponent extends Component {
         break;
       case ReportStatus.Submitted:
         if (this.dot) this.dot.classList.add(STATUS_COLOR_SUBMITTED);
+        this.setReadonly(true);
         break;
       case ReportStatus.Rejected:
         if (this.dot) this.dot.classList.add(STATUS_COLOR_REJECTED);
@@ -178,7 +201,11 @@ export class RecordComponent extends Component {
       entryElement.setAttribute(ENTRY_DURATION_ATTRIBUTE, entry.duration);
       entryElement.setAttribute(ENTRY_ID_ATTRIBUTE, index.toString());
 
-      this.handleEntryEdit(entryElement, entry);
+      if (this.readonly) {
+        entryElement.setAttribute(ENTRY_READONLY_ATTRIBUTE, TRUE_VALUE);
+      } else {
+        this.handleEntryEdit(entryElement, entry);
+      }
 
       content.appendChild(entryElement);
     });
@@ -195,6 +222,7 @@ export class RecordComponent extends Component {
   }
 
   private reset() {
+    this.setReadonly(false);
     this.entries = [];
     this.renderEntries();
   }
@@ -259,6 +287,12 @@ export class RecordComponent extends Component {
   private bindNavigation() {
     if (this.back) {
       this.back.addEventListener(CLICK_EVENT, () => {
+        this.navigationService.navigate(DASHBOARD_PATH);
+      });
+    }
+
+    if (this.done) {
+      this.done.addEventListener(CLICK_EVENT, async () => {
         this.navigationService.navigate(DASHBOARD_PATH);
       });
     }
@@ -373,6 +407,7 @@ export class RecordComponent extends Component {
     this.dot = this.document.querySelector("#dot");
     this.status = this.document.querySelector("#status");
     this.submit = this.document.querySelector("#submit");
+    this.done = this.document.querySelector("#done");
 
     const weekNumber = this.loadWeek();
 
