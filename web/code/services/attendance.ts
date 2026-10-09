@@ -50,9 +50,12 @@ const WEEK_MILLISECONDS: number = 604800000;
 const BASE_COUNT_INDEX: number = 0;
 
 const ATTENDANCE_PATH: string = "/attendance";
+const ATTENDANCE_LIST_PATH: string = `${ATTENDANCE_PATH}/list`;
+const ATTENDANCE_SUBMIT_PATH: string = `${ATTENDANCE_PATH}/submit`;
 const ACTIVE_SEASON_PATH: string = "/season/active";
 
 const WEEK_HEADER: string = "week";
+const INCLUDE_CREDENTIALS: "include" = "include";
 
 export class AttendanceService {
   private static instance: Undefined<AttendanceService>;
@@ -101,6 +104,23 @@ export class AttendanceService {
     });
 
     return response;
+  }
+
+  public async submitRecord(week: number): Promise<Nullable<void>> {
+    const response: Response = await fetch(ATTENDANCE_SUBMIT_PATH, {
+      headers: { week: week.toString() },
+    });
+
+    if (response.ok) {
+      return;
+    } else {
+      return null;
+    }
+  }
+
+  public async fetchRecords(): Promise<Report[]> {
+    const response: Response = await fetch(ATTENDANCE_LIST_PATH);
+    return await response.json();
   }
 
   public async fetchRecord(week: number): Promise<Nullable<Report>> {

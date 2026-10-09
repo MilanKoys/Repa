@@ -82,6 +82,7 @@ export class RecordComponent extends Component {
   private save: Nullable<HTMLElement> = null;
   private dot: Nullable<HTMLElement> = null;
   private status: Nullable<HTMLElement> = null;
+  private submit: Nullable<HTMLElement> = null;
 
   private entries: Entry[] = [];
 
@@ -215,6 +216,7 @@ export class RecordComponent extends Component {
   private bindEvents() {
     const detail = this.detail;
     const save = this.save;
+    const submit = this.submit;
 
     if (detail) {
       detail.addEventListener(SUBMIT_EVENT, (event: Event) => {
@@ -242,6 +244,14 @@ export class RecordComponent extends Component {
 
         await this.attendanceService.saveRecord(weekNumber, rows);
         this.setStatus(ReportStatus.Draft);
+      });
+    }
+
+    if (submit) {
+      submit.addEventListener(CLICK_EVENT, async () => {
+        const weekNumber: number = this.loadWeek();
+        await this.attendanceService.submitRecord(weekNumber);
+        this.setStatus(ReportStatus.Submitted);
       });
     }
   }
@@ -362,6 +372,7 @@ export class RecordComponent extends Component {
     this.save = this.document.querySelector("#save");
     this.dot = this.document.querySelector("#dot");
     this.status = this.document.querySelector("#status");
+    this.submit = this.document.querySelector("#submit");
 
     const weekNumber = this.loadWeek();
 

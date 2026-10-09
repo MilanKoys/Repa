@@ -1,5 +1,5 @@
 import { Component } from "../../component.js";
-import { AttendanceService } from "../../services/attendance.js";
+import { AttendanceService, type Report } from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
 import { LeafStatus } from "../leaf/leaf.js";
 
@@ -50,6 +50,7 @@ export class WeeksComponent extends Component {
 
   private page: number = 0;
   private leafStart: Nullable<number> = null;
+  private reportList: Report[] = [];
 
   constructor() {
     super();
@@ -200,6 +201,8 @@ export class WeeksComponent extends Component {
     this.range = this.document.querySelector("#range");
 
     await this.attendanceService.initialized;
+    this.reportList = await this.attendanceService.fetchRecords();
+
     this.initialRender();
     this.bindEvents();
   }
@@ -256,6 +259,14 @@ export class WeeksComponent extends Component {
 
       if (counter == weekCount - WEEK_ADDED) {
         leafElement.setAttribute(LEAF_ACTIVE_ATTRIBUTE, LEAF_ACTIVE_VALUE);
+      }
+
+      const foundReport = this.reportList.find((report) => {
+        return report.week === realCounter;
+      });
+
+      if (foundReport) {
+        leafElement.setAttribute(LEAF_STATUS_ATTRIBUTE, foundReport.status);
       }
 
       leafElement.setAttribute(LEAF_WEEK_ATTRIBUTE, weekLabel);
