@@ -284,38 +284,44 @@ export class RecordComponent extends Component {
     }
   }
 
+  private bindBack(element: Nullable<HTMLElement>) {
+    if (element) {
+      element.addEventListener(CLICK_EVENT, () => {
+        this.navigationService.navigate(DASHBOARD_PATH);
+      });
+    }
+  }
+
+  private bindChangeWeek(
+    element: Nullable<HTMLElement>,
+    adder: number,
+    checkCallback: (weekNumber: number) => boolean,
+  ) {
+    if (element) {
+      element.addEventListener(CLICK_EVENT, () => {
+        const weekNumber: number = this.loadWeek();
+        const newWeekNumber: number = weekNumber + adder;
+        if (checkCallback(newWeekNumber)) return;
+        this.setWeek(newWeekNumber);
+        this.reset();
+      });
+    }
+  }
+
   private bindNavigation() {
-    if (this.back) {
-      this.back.addEventListener(CLICK_EVENT, () => {
-        this.navigationService.navigate(DASHBOARD_PATH);
-      });
-    }
+    this.bindBack(this.back);
+    this.bindBack(this.done);
 
-    if (this.done) {
-      this.done.addEventListener(CLICK_EVENT, async () => {
-        this.navigationService.navigate(DASHBOARD_PATH);
-      });
-    }
+    const nextCheck = (weekNumber: number) => {
+      return weekNumber > this.attendanceService.weekAmount;
+    };
 
-    if (this.next) {
-      this.next.addEventListener(CLICK_EVENT, () => {
-        const weekNumber: number = this.loadWeek();
-        const newWeekNumber: number = weekNumber + ONE;
-        if (newWeekNumber > this.attendanceService.weekAmount) return;
-        this.setWeek(newWeekNumber);
-        this.reset();
-      });
-    }
+    const previousCheck = (weekNumber: number) => {
+      return weekNumber < ONE;
+    };
 
-    if (this.previous) {
-      this.previous.addEventListener(CLICK_EVENT, () => {
-        const weekNumber: number = this.loadWeek();
-        const newWeekNumber: number = weekNumber - ONE;
-        if (newWeekNumber < ONE) return;
-        this.setWeek(newWeekNumber);
-        this.reset();
-      });
-    }
+    this.bindChangeWeek(this.next, ONE, nextCheck);
+    this.bindChangeWeek(this.previous, -ONE, previousCheck);
 
     if (this.add) {
       const detail = this.detail;
@@ -389,9 +395,7 @@ export class RecordComponent extends Component {
     }
   }
 
-  protected async templateLoaded() {
-    await this.attendanceService.initialized;
-
+  private bindElements() {
     this.detail = this.document.querySelector("#detail");
     this.week = this.document.querySelector("#week");
     this.next = this.document.querySelector("#next");
@@ -408,9 +412,14 @@ export class RecordComponent extends Component {
     this.status = this.document.querySelector("#status");
     this.submit = this.document.querySelector("#submit");
     this.done = this.document.querySelector("#done");
+  }
+
+  protected async templateLoaded() {
+    await this.attendanceService.initialized;
 
     const weekNumber = this.loadWeek();
 
+    this.bindElements();
     await this.loadEntries(weekNumber);
     this.renderWeek(weekNumber);
     this.renderDate(weekNumber);
