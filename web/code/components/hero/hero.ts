@@ -2,6 +2,8 @@ import type { UserProfile } from "../../services/authentification.js";
 
 import { Component } from "../../component.js";
 import { AuthentificationService } from "../../services/authentification.js";
+import { NavigationService } from "../../services/navigation.js";
+import { AttendanceService } from "../../services/attendance.js";
 
 type Undefined<T> = undefined | T;
 
@@ -9,6 +11,12 @@ interface DayGreeting {
   range: [number, number];
   greeting: string;
 }
+
+const CLICK_EVENT: string = "click";
+
+const STORAGE_WEEK_KEY: string = "week";
+
+const ATTENDANCE_PATH: string = "attendance";
 
 const DEFAULT_USERNAME: string = "User";
 const DATE_STRING_TYPE: "long" = "long";
@@ -43,9 +51,12 @@ const DAY_GREEINGS: DayGreeting[] = DAY_GREETING_LIST.map((items) => {
 
 export class HeroComponent extends Component {
   private authService = AuthentificationService.inject();
+  private navigationService = NavigationService.inject();
+  private attendanceService = AttendanceService.inject();
 
   private date: HTMLElement | null = null;
   private greeting: HTMLElement | null = null;
+  private record: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -80,9 +91,16 @@ export class HeroComponent extends Component {
     }
   }
 
+  private openWeek(number: number) {
+    sessionStorage.setItem(STORAGE_WEEK_KEY, number.toString());
+    this.navigationService.navigate(ATTENDANCE_PATH);
+  }
+
   protected async templateLoaded() {
+    await this.attendanceService.initialized;
     this.date = this.document.querySelector("#date");
     this.greeting = this.document.querySelector("#greeting");
+    this.record = this.document.querySelector("#record");
 
     const currentDate: Date = new Date();
 
@@ -90,6 +108,12 @@ export class HeroComponent extends Component {
       const dayName: string = this.getDayName(currentDate);
       const monthName: string = this.getMonthName(currentDate);
       this.date.textContent = `${dayName} ${currentDate.getDate()} ${monthName} `;
+    }
+
+    if (this.record) {
+      this.record.addEventListener(CLICK_EVENT, () => {
+        this.openWeek(this.attendanceService.weekAmount);
+      });
     }
 
     if (this.greeting) {
