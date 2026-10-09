@@ -5,6 +5,7 @@ const TEMPLATE_ELEMENT: "template" = "template";
 type Undefined<T> = undefined | T;
 type TemplateMap = Map<string, Promise<HTMLTemplateElement>>;
 type TemplatePromise = Promise<HTMLTemplateElement>;
+export type ElementSignal<T> = () => T;
 
 export class Component extends HTMLElement {
   private static templates: TemplateMap = new Map();
@@ -66,6 +67,14 @@ export class Component extends HTMLElement {
     }
 
     return template;
+  }
+
+  protected element<T>(selector: string): ElementSignal<T> {
+    return () => {
+      const element = this.document.querySelector(selector) as T;
+      if (!element) throw new Error(`Can't select element ${selector}!`);
+      return element;
+    };
   }
 
   protected async loadTemplate(templatePath: string) {

@@ -1,4 +1,4 @@
-import { Component } from "../../component.js";
+import { Component, type ElementSignal } from "../../component.js";
 import { AttendanceService, ReportStatus } from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
 import type { DetailComponent } from "../detail/detail.js";
@@ -73,22 +73,22 @@ export class RecordComponent extends Component {
 
   private readonly: boolean = false;
 
-  private detail: Nullable<DetailComponent> = null;
-  private week: Nullable<HTMLElement> = null;
-  private next: Nullable<HTMLElement> = null;
-  private previous: Nullable<HTMLElement> = null;
-  private back: Nullable<HTMLElement> = null;
-  private add: Nullable<HTMLElement> = null;
-  private empty: Nullable<HTMLElement> = null;
-  private content: Nullable<HTMLElement> = null;
-  private time: Nullable<HTMLElement> = null;
-  private count: Nullable<HTMLElement> = null;
-  private date: Nullable<HTMLElement> = null;
-  private save: Nullable<HTMLElement> = null;
-  private dot: Nullable<HTMLElement> = null;
-  private status: Nullable<HTMLElement> = null;
-  private submit: Nullable<HTMLElement> = null;
-  private done: Nullable<HTMLElement> = null;
+  private detail: ElementSignal<DetailComponent> = this.element("#detail");
+  private week: ElementSignal<Element> = this.element("#week");
+  private next: ElementSignal<Element> = this.element("#next");
+  private previous: ElementSignal<Element> = this.element("#previous");
+  private back: ElementSignal<Element> = this.element("#back");
+  private add: ElementSignal<Element> = this.element("#add");
+  private empty: ElementSignal<Element> = this.element("#empty");
+  private content: ElementSignal<Element> = this.element("#content");
+  private time: ElementSignal<Element> = this.element("#time");
+  private count: ElementSignal<Element> = this.element("#count");
+  private date: ElementSignal<Element> = this.element("#date");
+  private save: ElementSignal<Element> = this.element("#save");
+  private dot: ElementSignal<Element> = this.element("#dot");
+  private status: ElementSignal<Element> = this.element("#status");
+  private submit: ElementSignal<Element> = this.element("#submit");
+  private done: ElementSignal<Element> = this.element("#done");
 
   private entries: Entry[] = [];
 
@@ -101,10 +101,10 @@ export class RecordComponent extends Component {
     entryElement.addEventListener(CLICK_EVENT, () => {
       const identifier = entryElement.getAttribute(ENTRY_ID_ATTRIBUTE);
 
-      if (this.detail && identifier) {
-        this.detail.setAttribute(ENTRY_ID_ATTRIBUTE, identifier);
-        this.detail.setDetail(entry.type, entry.about, entry.duration);
-        this.detail.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
+      if (identifier) {
+        this.detail().setAttribute(ENTRY_ID_ATTRIBUTE, identifier);
+        this.detail().setDetail(entry.type, entry.about, entry.duration);
+        this.detail().setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
       }
     });
   }
@@ -112,22 +112,22 @@ export class RecordComponent extends Component {
   private setReadonly(toggle: boolean) {
     if (toggle) {
       this.readonly = true;
-      if (this.add) this.add.classList.add(HIDDEN_CLASS);
-      if (this.submit) this.submit.classList.add(HIDDEN_CLASS);
-      if (this.save) this.save.classList.add(HIDDEN_CLASS);
-      if (this.done) this.done.classList.remove(HIDDEN_CLASS);
+      this.add().classList.add(HIDDEN_CLASS);
+      this.submit().classList.add(HIDDEN_CLASS);
+      this.save().classList.add(HIDDEN_CLASS);
+      this.done().classList.remove(HIDDEN_CLASS);
     } else {
       this.readonly = false;
-      if (this.add) this.add.classList.remove(HIDDEN_CLASS);
-      if (this.submit) this.submit.classList.remove(HIDDEN_CLASS);
-      if (this.save) this.save.classList.remove(HIDDEN_CLASS);
-      if (this.done) this.done.classList.add(HIDDEN_CLASS);
+      this.add().classList.remove(HIDDEN_CLASS);
+      this.submit().classList.remove(HIDDEN_CLASS);
+      this.save().classList.remove(HIDDEN_CLASS);
+      this.done().classList.add(HIDDEN_CLASS);
     }
   }
 
   private renderTime() {
-    if (!this.entries.length && this.time) {
-      this.time.textContent = `${DEFAULT_TIME_STING} ${MINUTE_STRING}`;
+    if (!this.entries.length) {
+      this.time().textContent = `${DEFAULT_TIME_STING} ${MINUTE_STRING}`;
       return;
     }
 
@@ -144,54 +144,47 @@ export class RecordComponent extends Component {
     const minutes: number = fullMinutes - ONE_HOUR_MINUTES * hours;
     const hourString: string = hours ? `${hours} ${HOUR_STRING}` : EMPTY_STRING;
 
-    if (this.time) {
-      this.time.textContent = `${hourString}  ${minutes} ${MINUTE_STRING}`;
-    }
+    this.time().textContent = `${hourString}  ${minutes} ${MINUTE_STRING}`;
   }
 
   private setStatus(status: ReportStatus) {
-    if (this.status) this.status.textContent = status;
+    this.status().textContent = status;
     STATUS_COLOR_LIST.forEach((statusColor) => {
-      if (this.dot) this.dot.classList.remove(statusColor);
+      this.dot().classList.remove(statusColor);
     });
 
     switch (status) {
       case ReportStatus.Empty:
-        if (this.dot) this.dot.classList.add(STATUS_COLOR_EMPTY);
+        this.dot().classList.add(STATUS_COLOR_EMPTY);
         break;
       case ReportStatus.Draft:
-        if (this.dot) this.dot.classList.add(STATUS_COLOR_DRAFT);
+        this.dot().classList.add(STATUS_COLOR_DRAFT);
         break;
       case ReportStatus.Submitted:
-        if (this.dot) this.dot.classList.add(STATUS_COLOR_SUBMITTED);
+        this.dot().classList.add(STATUS_COLOR_SUBMITTED);
         this.setReadonly(true);
         break;
       case ReportStatus.Rejected:
-        if (this.dot) this.dot.classList.add(STATUS_COLOR_REJECTED);
+        this.dot().classList.add(STATUS_COLOR_REJECTED);
         break;
       case ReportStatus.Approved:
-        if (this.dot) this.dot.classList.add(STATUS_COLOR_APPROVED);
+        this.dot().classList.add(STATUS_COLOR_APPROVED);
         break;
     }
   }
 
   private renderEntries() {
-    const empty = this.empty;
-    const content = this.content;
-
-    if (this.count) this.count.textContent = this.entries.length.toString();
-
-    if (!empty || !content) return;
+    this.count().textContent = this.entries.length.toString();
 
     this.renderTime();
 
     if (!this.entries.length) {
-      content.classList.add(HIDDEN_CLASS);
-      empty.classList.remove(HIDDEN_CLASS);
+      this.content().classList.add(HIDDEN_CLASS);
+      this.empty().classList.remove(HIDDEN_CLASS);
       return;
     }
 
-    content.innerHTML = EMPTY_STRING;
+    this.content().innerHTML = EMPTY_STRING;
 
     this.entries.forEach((entry, index) => {
       const entryElement = document.createElement(ENTRY_SELECTOR);
@@ -207,18 +200,16 @@ export class RecordComponent extends Component {
         this.handleEntryEdit(entryElement, entry);
       }
 
-      content.appendChild(entryElement);
+      this.content().appendChild(entryElement);
     });
 
-    empty.classList.add(HIDDEN_CLASS);
-    content.classList.remove(HIDDEN_CLASS);
+    this.empty().classList.add(HIDDEN_CLASS);
+    this.content().classList.remove(HIDDEN_CLASS);
   }
 
   private renderWeek(number: number) {
-    if (this.week) this.week.textContent = `${number}`;
-    if (this.detail) {
-      this.detail.setAttribute(DETAIL_WEEK_ATTRIBUTE, `${number}`);
-    }
+    this.week().textContent = `${number}`;
+    this.detail().setAttribute(DETAIL_WEEK_ATTRIBUTE, `${number}`);
   }
 
   private reset() {
@@ -246,71 +237,61 @@ export class RecordComponent extends Component {
     const save = this.save;
     const submit = this.submit;
 
-    if (detail) {
-      detail.addEventListener(SUBMIT_EVENT, (event: Event) => {
-        const customEvent: CustomEvent = event as CustomEvent;
-        this.handleEntrySubmit(detail, customEvent.detail);
+    detail().addEventListener(SUBMIT_EVENT, (event: Event) => {
+      const customEvent: CustomEvent = event as CustomEvent;
+      this.handleEntrySubmit(detail(), customEvent.detail);
+    });
+
+    detail().addEventListener(DELETE_EVENT, (event: Event) => {
+      const customEvent: CustomEvent = event as CustomEvent;
+      this.entries.splice(customEvent.detail, ONE);
+      this.renderEntries();
+    });
+
+    save().addEventListener(CLICK_EVENT, async () => {
+      const weekNumber: number = this.loadWeek();
+      const rows = this.entries.map((entry) => {
+        return {
+          type: entry.type,
+          duration: parseInt(entry.duration),
+          about: entry.about.length ? entry.about : undefined,
+        };
       });
 
-      detail.addEventListener(DELETE_EVENT, (event: Event) => {
-        const customEvent: CustomEvent = event as CustomEvent;
-        this.entries.splice(customEvent.detail, ONE);
-        this.renderEntries();
-      });
-    }
+      await this.attendanceService.saveRecord(weekNumber, rows);
+      this.setStatus(ReportStatus.Draft);
+    });
 
-    if (save) {
-      save.addEventListener(CLICK_EVENT, async () => {
-        const weekNumber: number = this.loadWeek();
-        const rows = this.entries.map((entry) => {
-          return {
-            type: entry.type,
-            duration: parseInt(entry.duration),
-            about: entry.about.length ? entry.about : undefined,
-          };
-        });
-
-        await this.attendanceService.saveRecord(weekNumber, rows);
-        this.setStatus(ReportStatus.Draft);
-      });
-    }
-
-    if (submit) {
-      submit.addEventListener(CLICK_EVENT, async () => {
-        const weekNumber: number = this.loadWeek();
-        await this.attendanceService.submitRecord(weekNumber);
-        this.setStatus(ReportStatus.Submitted);
-      });
-    }
+    submit().addEventListener(CLICK_EVENT, async () => {
+      const weekNumber: number = this.loadWeek();
+      await this.attendanceService.submitRecord(weekNumber);
+      this.setStatus(ReportStatus.Submitted);
+    });
   }
 
-  private bindBack(element: Nullable<HTMLElement>) {
-    if (element) {
-      element.addEventListener(CLICK_EVENT, () => {
-        this.navigationService.navigate(DASHBOARD_PATH);
-      });
-    }
+  private bindBack(element: Element) {
+    element.addEventListener(CLICK_EVENT, () => {
+      this.navigationService.navigate(DASHBOARD_PATH);
+    });
   }
 
   private bindChangeWeek(
-    element: Nullable<HTMLElement>,
+    element: Element,
     adder: number,
     checkCallback: (weekNumber: number) => boolean,
   ) {
-    if (element) {
-      element.addEventListener(CLICK_EVENT, () => {
-        const weekNumber: number = this.loadWeek();
-        const newWeekNumber: number = weekNumber + adder;
-        if (checkCallback(newWeekNumber)) return;
-        this.setWeek(newWeekNumber);
-        this.reset();
-      });
-    }
+    element.addEventListener(CLICK_EVENT, () => {
+      const weekNumber: number = this.loadWeek();
+      const newWeekNumber: number = weekNumber + adder;
+      if (checkCallback(newWeekNumber)) return;
+      this.setWeek(newWeekNumber);
+      this.reset();
+    });
   }
 
   private bindNavigation() {
-    this.bindBack(this.back);
-    this.bindBack(this.done);
+    this.bindBack(this.back());
+    this.bindBack(this.done());
 
     const nextCheck = (weekNumber: number) => {
       return weekNumber > this.attendanceService.weekAmount;
@@ -320,15 +301,12 @@ export class RecordComponent extends Component {
       return weekNumber < ONE;
     };
 
-    this.bindChangeWeek(this.next, ONE, nextCheck);
-    this.bindChangeWeek(this.previous, -ONE, previousCheck);
+    this.bindChangeWeek(this.next(), ONE, nextCheck);
+    this.bindChangeWeek(this.previous(), -ONE, previousCheck);
 
-    if (this.add) {
-      const detail = this.detail;
-      this.add.addEventListener(CLICK_EVENT, () => {
-        if (detail) detail.setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
-      });
-    }
+    this.add().addEventListener(CLICK_EVENT, () => {
+      this.detail().setAttribute(ENTRY_OPEN_ATTRIBUTE, ENTRY_OPEN_VALUE);
+    });
   }
 
   private getMontName(date: Date) {
@@ -356,10 +334,8 @@ export class RecordComponent extends Component {
     const dateEndString: string = `${weekDateEnd.getDate()} ${dateMonthEndSlice} ${weekDateEnd.getFullYear()}`;
 
     const dateString: string = `${dateStartString} - ${dateEndString}`;
-    if (this.date) this.date.textContent = dateString;
-    if (this.detail) {
-      this.detail.setAttribute(DETAIL_DATE_ATTRIBUTE, dateString);
-    }
+    this.date().textContent = dateString;
+    this.detail().setAttribute(DETAIL_DATE_ATTRIBUTE, dateString);
   }
 
   private async setWeek(weekNumber: number) {
@@ -384,7 +360,7 @@ export class RecordComponent extends Component {
       const reports = report.rows.map((row) => {
         return {
           type: row.type,
-          about: row.about ?? "",
+          about: row.about ?? EMPTY_STRING,
           duration: row.duration.toString(),
         };
       });
@@ -395,31 +371,11 @@ export class RecordComponent extends Component {
     }
   }
 
-  private bindElements() {
-    this.detail = this.document.querySelector("#detail");
-    this.week = this.document.querySelector("#week");
-    this.next = this.document.querySelector("#next");
-    this.previous = this.document.querySelector("#previous");
-    this.back = this.document.querySelector("#back");
-    this.add = this.document.querySelector("#add");
-    this.empty = this.document.querySelector("#empty");
-    this.content = this.document.querySelector("#content");
-    this.time = this.document.querySelector("#time");
-    this.count = this.document.querySelector("#count");
-    this.date = this.document.querySelector("#date");
-    this.save = this.document.querySelector("#save");
-    this.dot = this.document.querySelector("#dot");
-    this.status = this.document.querySelector("#status");
-    this.submit = this.document.querySelector("#submit");
-    this.done = this.document.querySelector("#done");
-  }
-
   protected async templateLoaded() {
     await this.attendanceService.initialized;
 
     const weekNumber = this.loadWeek();
 
-    this.bindElements();
     await this.loadEntries(weekNumber);
     this.renderWeek(weekNumber);
     this.renderDate(weekNumber);
