@@ -1,4 +1,4 @@
-import { Component } from "../../component.js";
+import { Component, type ElementSignal } from "../../component.js";
 import { AttendanceService, type Report } from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
 import { LeafStatus } from "../leaf/leaf.js";
@@ -42,11 +42,11 @@ export class WeeksComponent extends Component {
   private navigationService: NavigationService = NavigationService.inject();
   private attendanceService: AttendanceService = AttendanceService.inject();
 
-  private weeks: Nullable<HTMLElement> = null;
-  private previous: Nullable<HTMLElement> = null;
-  private next: Nullable<HTMLElement> = null;
-  private last: Nullable<HTMLElement> = null;
-  private range: Nullable<HTMLElement> = null;
+  private weeks: ElementSignal<Element> = this.element("#weeks");
+  private previous: ElementSignal<Element> = this.element("#previous");
+  private next: ElementSignal<Element> = this.element("#next");
+  private last: ElementSignal<Element> = this.element("#last");
+  private range: ElementSignal<Element> = this.element("#range");
 
   private page: number = 0;
   private leafStart: Nullable<number> = null;
@@ -76,7 +76,7 @@ export class WeeksComponent extends Component {
     return { adder, startDate, leafStart };
   }
 
-  private toggleActionClass(element: HTMLElement, toggle: boolean) {
+  private toggleActionClass(element: Element, toggle: boolean) {
     if (toggle) {
       element.classList.remove(DISABLE_ACTION_OPACITY_CLASS);
       element.classList.add(ENABLED_ACTION_CURSOR_CLASS);
@@ -140,39 +140,29 @@ export class WeeksComponent extends Component {
   private bindEvents() {
     this.disableEvents();
 
-    if (this.previous) {
-      this.previous.addEventListener(CLICK_EVENT, () => this.executePrevious());
-    }
-
-    if (this.next) {
-      this.next.addEventListener(CLICK_EVENT, () => this.executeNext());
-    }
-
-    if (this.last) {
-      this.last.addEventListener(CLICK_EVENT, () => this.scrollLast());
-    }
+    this.previous().addEventListener(CLICK_EVENT, () => this.executePrevious());
+    this.next().addEventListener(CLICK_EVENT, () => this.executeNext());
+    this.last().addEventListener(CLICK_EVENT, () => this.scrollLast());
   }
 
   private renderLastAction(toggle: boolean) {
-    if (this.last) {
-      if (!toggle) {
-        this.last.classList.add(HIDDEN_CLASS);
-      } else {
-        this.last.classList.remove(HIDDEN_CLASS);
-      }
+    if (!toggle) {
+      this.last().classList.add(HIDDEN_CLASS);
+    } else {
+      this.last().classList.remove(HIDDEN_CLASS);
     }
   }
 
   private async disableEvents() {
     if (this.previous) {
       const { toggle } = await this.calculatePrevious();
-      this.toggleActionClass(this.previous, toggle);
+      this.toggleActionClass(this.previous(), toggle);
     }
 
     if (this.next) {
       const { toggle } = await this.calculateNext();
       this.renderLastAction(toggle);
-      this.toggleActionClass(this.next, toggle);
+      this.toggleActionClass(this.next(), toggle);
     }
   }
 
@@ -194,12 +184,6 @@ export class WeeksComponent extends Component {
   }
 
   protected async templateLoaded() {
-    this.weeks = this.document.querySelector("#weeks");
-    this.previous = this.document.querySelector("#previous");
-    this.next = this.document.querySelector("#next");
-    this.last = this.document.querySelector("#last");
-    this.range = this.document.querySelector("#range");
-
     await this.attendanceService.initialized;
     this.reportList = await this.attendanceService.fetchRecords();
 
@@ -234,9 +218,7 @@ export class WeeksComponent extends Component {
       rangeString = startDate;
     }
 
-    if (this.range) {
-      this.range.textContent = rangeString;
-    }
+    this.range().textContent = rangeString;
   }
 
   protected renderLeaves(startTime: number) {
@@ -276,12 +258,12 @@ export class WeeksComponent extends Component {
         this.openWeek(realCounter);
       });
 
-      if (this.weeks) this.weeks.appendChild(leafElement);
+      this.weeks().appendChild(leafElement);
     }
   }
 
   protected async renderWeeks() {
-    if (this.weeks) this.weeks.innerHTML = EMPTY_STRING;
+    this.weeks().innerHTML = EMPTY_STRING;
     const leaf = this.attendanceService.leaf;
     if (!leaf || !leaf.season) return;
     this.renderRange(this.leafStart ?? leaf.season.start);

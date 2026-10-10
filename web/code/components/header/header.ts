@@ -1,6 +1,6 @@
 import type { UserProfile } from "../../services/authentification.js";
 
-import { Component } from "../../component.js";
+import { Component, type ElementSignal } from "../../component.js";
 import { AuthentificationService } from "../../services/authentification.js";
 
 type Undefined<T> = undefined | T;
@@ -16,9 +16,9 @@ const DEFAULT_AVATAR: string = "UR";
 export class HeaderComponent extends Component {
   private authService = AuthentificationService.inject();
 
-  private logout: HTMLElement | null = null;
-  private username: HTMLElement | null = null;
-  private avatar: HTMLElement | null = null;
+  private logout: ElementSignal<Element> = this.element("#logout");
+  private username: ElementSignal<Element> = this.element("#username");
+  private avatar: ElementSignal<Element> = this.element("#avatar");
 
   constructor() {
     super();
@@ -56,25 +56,15 @@ export class HeaderComponent extends Component {
   }
 
   protected async templateLoaded() {
-    this.logout = this.document.querySelector("#logout");
-    this.username = this.document.querySelector("#username");
-    this.avatar = this.document.querySelector("#avatar");
+    this.avatar().textContent = await this.loadAvatar();
 
-    if (this.avatar) {
-      this.avatar.textContent = await this.loadAvatar();
-    }
+    const name: string = await this.loadName();
+    this.username().textContent = name;
 
-    if (this.username) {
-      const name: string = await this.loadName();
-      this.username.textContent = name;
-    }
-
-    if (this.logout) {
-      this.logout.addEventListener(CLICK_EVENT, async () => {
-        await this.authService.logout();
-        await this.verifySession();
-      });
-    }
+    this.logout().addEventListener(CLICK_EVENT, async () => {
+      await this.authService.logout();
+      await this.verifySession();
+    });
   }
 
   async verifySession() {

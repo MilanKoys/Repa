@@ -1,4 +1,4 @@
-import { Component } from "../../component.js";
+import { Component, type ElementSignal } from "../../component.js";
 
 const WEEK_TEXT_NAME: string = "week";
 const DATE_TEXT_NAME: string = "date";
@@ -46,10 +46,10 @@ export class LeafComponent extends Component {
     STATUS_TEXT_NAME,
   ];
 
-  private week: HTMLElement | null = null;
-  private date: HTMLInputElement | null = null;
-  private shell: HTMLInputElement | null = null;
-  private status: HTMLInputElement | null = null;
+  private week: ElementSignal<Element> = this.element("#week");
+  private date: ElementSignal<Element> = this.element("#date");
+  private shell: ElementSignal<Element> = this.element("#shell");
+  private status: ElementSignal<Element> = this.element("#status");
 
   constructor() {
     super();
@@ -59,53 +59,42 @@ export class LeafComponent extends Component {
   private setStatus(newStatus: LeafStatus) {
     const statusElement = this.status;
 
-    if (statusElement) {
-      STATUS_CLASS_LIST.forEach((className) => {
-        statusElement.classList.remove(className);
-      });
+    STATUS_CLASS_LIST.forEach((className) => {
+      statusElement().classList.remove(className);
+    });
 
-      switch (newStatus) {
-        case LeafStatus.Draft:
-          statusElement.classList.add(STATUS_DRAFT_CLASS);
-          break;
-        case LeafStatus.Submitted:
-          statusElement.classList.add(STATUS_SUBMITTED_CLASS);
-          break;
-        case LeafStatus.Approved:
-          statusElement.classList.add(STATUS_APPROVED_CLASS);
-          break;
-        case LeafStatus.Rejected:
-          statusElement.classList.add(STATUS_REJECTED_CLASS);
-          break;
-        default:
-          statusElement.classList.add(STATUS_DEFAULT_CLASS);
-          break;
-      }
+    switch (newStatus) {
+      case LeafStatus.Draft:
+        statusElement().classList.add(STATUS_DRAFT_CLASS);
+        break;
+      case LeafStatus.Submitted:
+        statusElement().classList.add(STATUS_SUBMITTED_CLASS);
+        break;
+      case LeafStatus.Approved:
+        statusElement().classList.add(STATUS_APPROVED_CLASS);
+        break;
+      case LeafStatus.Rejected:
+        statusElement().classList.add(STATUS_REJECTED_CLASS);
+        break;
+      default:
+        statusElement().classList.add(STATUS_DEFAULT_CLASS);
+        break;
     }
   }
 
   private toggleActive(toggle: boolean) {
     const shellElement = this.shell;
-    if (shellElement) {
-      ACTIVATE_CLASS_LIST.forEach((className) => {
-        shellElement.classList.remove(className);
-      });
+    ACTIVATE_CLASS_LIST.forEach((className) => {
+      shellElement().classList.remove(className);
+    });
 
-      if (toggle) {
-        shellElement.classList.add(ACTIVE_BORDER_CLASS);
-        shellElement.classList.add(ACTIVE_BACKGROUND_CLASS);
-      } else {
-        shellElement.classList.add(INACTIVE_BORDER_CLASS);
-        shellElement.classList.add(INACTIVE_BACKGROUND_CLASS);
-      }
+    if (toggle) {
+      shellElement().classList.add(ACTIVE_BORDER_CLASS);
+      shellElement().classList.add(ACTIVE_BACKGROUND_CLASS);
+    } else {
+      shellElement().classList.add(INACTIVE_BORDER_CLASS);
+      shellElement().classList.add(INACTIVE_BACKGROUND_CLASS);
     }
-  }
-
-  protected async templateLoaded() {
-    this.week = this.document.querySelector("#week");
-    this.date = this.document.querySelector("#date");
-    this.shell = this.document.querySelector("#shell");
-    this.status = this.document.querySelector("#status");
   }
 
   async attributeChangedCallback(
@@ -117,10 +106,10 @@ export class LeafComponent extends Component {
 
     switch (name) {
       case WEEK_TEXT_NAME:
-        if (this.week) this.week.textContent = newValue;
+        this.week().textContent = newValue;
         break;
       case DATE_TEXT_NAME:
-        if (this.date) this.date.textContent = newValue;
+        this.date().textContent = newValue;
         break;
       case ACTIVE_TEXT_NAME:
         this.toggleActive(!!newValue);

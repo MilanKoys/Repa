@@ -1,5 +1,5 @@
-import { Component } from "../../component.js";
-import type { InputTextComponent } from "../input-text/input-text.js";
+import { Component, type ElementSignal } from "../../component.js";
+import type { InputTextComponent as InputText } from "../input-text/input-text.js";
 
 const HIDDEN_CLASS: string = "hidden";
 
@@ -26,19 +26,19 @@ export class DetailComponent extends Component {
     WEEK_NAME,
   ];
 
-  private content: HTMLElement | null = null;
-  private close: HTMLElement | null = null;
-  private cancel: HTMLElement | null = null;
-  private submit: HTMLElement | null = null;
-  private error: HTMLElement | null = null;
-  private delete: HTMLElement | null = null;
-  private header: HTMLElement | null = null;
-  private date: HTMLElement | null = null;
-  private week: HTMLElement | null = null;
+  private content: ElementSignal<Element> = this.element("#content");
+  private close: ElementSignal<Element> = this.element("#close");
+  private cancel: ElementSignal<Element> = this.element("#cancel");
+  private submit: ElementSignal<Element> = this.element("#submit");
+  private error: ElementSignal<Element> = this.element("#error");
+  private delete: ElementSignal<Element> = this.element("#delete");
+  private header: ElementSignal<Element> = this.element("#header");
+  private date: ElementSignal<Element> = this.element("#date");
+  private week: ElementSignal<Element> = this.element("#week");
 
-  private typeInput: InputTextComponent | null = null;
-  private durationInput: InputTextComponent | null = null;
-  private aboutInput: InputTextComponent | null = null;
+  private typeInput: ElementSignal<InputText> = this.element("#type");
+  private durationInput: ElementSignal<InputText> = this.element("#duration");
+  private aboutInput: ElementSignal<InputText> = this.element("#about");
 
   private type: string = "";
   private duration: string = "";
@@ -73,83 +73,62 @@ export class DetailComponent extends Component {
   private toggleError(text?: string) {
     if (this.error) {
       if (text) {
-        this.error.textContent = text;
-        this.error.classList.remove(HIDDEN_CLASS);
+        this.error().textContent = text;
+        this.error().classList.remove(HIDDEN_CLASS);
       } else {
-        this.error.textContent = EMPTY_STRING;
-        this.error.classList.add(HIDDEN_CLASS);
+        this.error().textContent = EMPTY_STRING;
+        this.error().classList.add(HIDDEN_CLASS);
       }
     }
   }
 
   private bindEvents() {
-    this.bindDetail(this.typeInput, (value) => (this.type = value));
-    this.bindDetail(this.durationInput, (value) => (this.duration = value));
-    this.bindDetail(this.aboutInput, (value) => (this.about = value));
+    this.bindDetail(this.typeInput(), (value) => (this.type = value));
+    this.bindDetail(this.durationInput(), (value) => (this.duration = value));
+    this.bindDetail(this.aboutInput(), (value) => (this.about = value));
 
-    if (this.close) {
-      this.close.addEventListener(CLICK_EVENT, () => this.closeContent());
-    }
+    this.close().addEventListener(CLICK_EVENT, () => this.closeContent());
 
-    if (this.cancel) {
-      this.cancel.addEventListener(CLICK_EVENT, () => this.closeContent());
-    }
+    this.cancel().addEventListener(CLICK_EVENT, () => this.closeContent());
 
-    if (this.delete) {
-      this.delete.addEventListener(CLICK_EVENT, () => {
-        this.dispatchCustomEvent(DELETE_EVENT, {
-          detail: this.getAttribute(IDENTIFIER_NAME),
-        });
-        this.closeContent();
+    this.delete().addEventListener(CLICK_EVENT, () => {
+      this.dispatchCustomEvent(DELETE_EVENT, {
+        detail: this.getAttribute(IDENTIFIER_NAME),
       });
-    }
+      this.closeContent();
+    });
 
-    if (this.submit) {
-      this.submit.addEventListener(CLICK_EVENT, () => {
-        this.toggleError();
+    this.submit().addEventListener(CLICK_EVENT, () => {
+      this.toggleError();
 
-        const type: string = this.type;
-        const duration: string = this.duration;
-        const about: string = this.about;
+      const type: string = this.type;
+      const duration: string = this.duration;
+      const about: string = this.about;
 
-        if (!type.length) {
-          return this.toggleError("Enter the class abbreviation.");
-        }
+      if (!type.length) {
+        return this.toggleError("Enter the class abbreviation.");
+      }
 
-        if (!duration.length) {
-          return this.toggleError("Enter how long the class took.");
-        }
+      if (!duration.length) {
+        return this.toggleError("Enter how long the class took.");
+      }
 
-        this.dispatchCustomEvent(SUBMIT_EVENT, {
-          detail: { type, duration, about },
-        });
-
-        this.closeContent();
+      this.dispatchCustomEvent(SUBMIT_EVENT, {
+        detail: { type, duration, about },
       });
-    }
+
+      this.closeContent();
+    });
   }
 
   protected templateLoaded() {
-    this.typeInput = this.document.querySelector("#type");
-    this.durationInput = this.document.querySelector("#duration");
-    this.aboutInput = this.document.querySelector("#about");
-    this.content = this.document.querySelector("#content");
-    this.close = this.document.querySelector("#close");
-    this.cancel = this.document.querySelector("#cancel");
-    this.submit = this.document.querySelector("#submit");
-    this.error = this.document.querySelector("#error");
-    this.delete = this.document.querySelector("#delete");
-    this.header = this.document.querySelector("#header");
-    this.date = this.document.querySelector("#date");
-    this.week = this.document.querySelector("#week");
-
     this.bindEvents();
   }
 
   public setDetail(type: string, about: string, duration: string) {
-    if (this.typeInput) this.typeInput.setValue(type);
-    if (this.durationInput) this.durationInput.setValue(duration);
-    if (this.aboutInput) this.aboutInput.setValue(about);
+    this.typeInput().setValue(type);
+    this.durationInput().setValue(duration);
+    this.aboutInput().setValue(about);
 
     this.type = type;
     this.duration = duration;
@@ -158,9 +137,9 @@ export class DetailComponent extends Component {
 
   public reset() {
     this.toggleError();
-    if (this.typeInput) this.typeInput.clear();
-    if (this.durationInput) this.durationInput.clear();
-    if (this.aboutInput) this.aboutInput.clear();
+    this.typeInput().clear();
+    this.durationInput().clear();
+    this.aboutInput().clear();
     this.removeAttribute(IDENTIFIER_NAME);
 
     this.type = EMPTY_STRING;
@@ -177,29 +156,25 @@ export class DetailComponent extends Component {
 
     switch (name) {
       case WEEK_NAME:
-        if (this.week) this.week.textContent = newValue;
+        this.week().textContent = newValue;
         break;
       case DATE_NAME:
-        if (this.date) this.date.textContent = newValue;
+        this.date().textContent = newValue;
         break;
       case OPEN_NAME:
-        if (this.content) {
-          if (newValue) {
-            this.content.classList.remove(HIDDEN_CLASS);
-          } else {
-            this.content.classList.add(HIDDEN_CLASS);
-          }
+        if (newValue) {
+          this.content().classList.remove(HIDDEN_CLASS);
+        } else {
+          this.content().classList.add(HIDDEN_CLASS);
         }
         break;
       case IDENTIFIER_NAME:
-        if (this.header && this.delete) {
-          if (newValue) {
-            this.delete.classList.remove(HIDDEN_CLASS);
-            this.header.textContent = EDIT_HEADER;
-          } else {
-            this.delete.classList.add(HIDDEN_CLASS);
-            this.header.textContent = ADD_HEADER;
-          }
+        if (newValue) {
+          this.delete().classList.remove(HIDDEN_CLASS);
+          this.header().textContent = EDIT_HEADER;
+        } else {
+          this.delete().classList.add(HIDDEN_CLASS);
+          this.header().textContent = ADD_HEADER;
         }
         break;
     }

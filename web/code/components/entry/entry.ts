@@ -1,4 +1,4 @@
-import { Component } from "../../component.js";
+import { Component, type ElementSignal } from "../../component.js";
 
 const TYPE_NAME: string = "type";
 const ABOUT_NAME: string = "about";
@@ -19,21 +19,14 @@ export class EntryComponent extends Component {
     READONLY_NAME,
   ];
 
-  private type: HTMLElement | null = null;
-  private about: HTMLElement | null = null;
-  private duration: HTMLElement | null = null;
-  private shell: HTMLElement | null = null;
+  private type: ElementSignal<Element> = this.element("#type");
+  private about: ElementSignal<Element> = this.element("#about");
+  private duration: ElementSignal<Element> = this.element("#duration");
+  private shell: ElementSignal<Element> = this.element("#shell");
 
   constructor() {
     super();
     this.loadTemplate("/components/entry/entry.html");
-  }
-
-  protected templateLoaded() {
-    this.type = this.document.querySelector("#type");
-    this.about = this.document.querySelector("#about");
-    this.duration = this.document.querySelector("#duration");
-    this.shell = this.document.querySelector("#shell");
   }
 
   async attributeChangedCallback(
@@ -45,18 +38,16 @@ export class EntryComponent extends Component {
 
     switch (name) {
       case TYPE_NAME:
-        if (this.type) this.type.textContent = newValue;
+        this.type().textContent = newValue;
         break;
       case ABOUT_NAME:
-        if (this.about) this.about.textContent = newValue;
+        this.about().textContent = newValue;
         break;
       case READONLY_NAME:
-        if (this.shell) {
-          if (newValue) {
-            this.shell.classList.remove(CURSOR_CLASS);
-          } else {
-            this.shell.classList.add(CURSOR_CLASS);
-          }
+        if (newValue) {
+          this.shell().classList.remove(CURSOR_CLASS);
+        } else {
+          this.shell().classList.add(CURSOR_CLASS);
         }
         break;
       case DURATION_NAME:
@@ -66,9 +57,7 @@ export class EntryComponent extends Component {
         const hourString: string = `${hours} ${HOUR_STRING}`;
         const realhours: string = hours ? `${hourString}` : EMPTY_STRING;
 
-        if (this.duration) {
-          this.duration.textContent = `${realhours}  ${minutes}`;
-        }
+        this.duration().textContent = `${realhours}  ${minutes}`;
         break;
     }
   }

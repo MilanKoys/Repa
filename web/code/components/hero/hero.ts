@@ -1,6 +1,6 @@
 import type { UserProfile } from "../../services/authentification.js";
 
-import { Component } from "../../component.js";
+import { Component, type ElementSignal } from "../../component.js";
 import { AuthentificationService } from "../../services/authentification.js";
 import { NavigationService } from "../../services/navigation.js";
 import { AttendanceService } from "../../services/attendance.js";
@@ -54,9 +54,9 @@ export class HeroComponent extends Component {
   private navigationService = NavigationService.inject();
   private attendanceService = AttendanceService.inject();
 
-  private date: HTMLElement | null = null;
-  private greeting: HTMLElement | null = null;
-  private record: HTMLElement | null = null;
+  private date: ElementSignal<Element> = this.element("#date");
+  private greeting: ElementSignal<Element> = this.element("#greeting");
+  private record: ElementSignal<Element> = this.element("#record");
 
   constructor() {
     super();
@@ -98,38 +98,29 @@ export class HeroComponent extends Component {
 
   protected async templateLoaded() {
     await this.attendanceService.initialized;
-    this.date = this.document.querySelector("#date");
-    this.greeting = this.document.querySelector("#greeting");
-    this.record = this.document.querySelector("#record");
 
     const currentDate: Date = new Date();
 
-    if (this.date) {
-      const dayName: string = this.getDayName(currentDate);
-      const monthName: string = this.getMonthName(currentDate);
-      this.date.textContent = `${dayName} ${currentDate.getDate()} ${monthName} `;
-    }
+    const dayName: string = this.getDayName(currentDate);
+    const monthName: string = this.getMonthName(currentDate);
+    this.date().textContent = `${dayName} ${currentDate.getDate()} ${monthName} `;
 
-    if (this.record) {
-      this.record.addEventListener(CLICK_EVENT, () => {
-        this.openWeek(this.attendanceService.weekAmount);
-      });
-    }
+    this.record().addEventListener(CLICK_EVENT, () => {
+      this.openWeek(this.attendanceService.weekAmount);
+    });
 
-    if (this.greeting) {
-      const firstName: string = await this.loadFirstName();
-      const hour: number = new Date().getHours();
-      let dayGreeting: string = "Good day";
+    const firstName: string = await this.loadFirstName();
+    const hour: number = new Date().getHours();
+    let dayGreeting: string = "Good day";
 
-      DAY_GREEINGS.forEach((dayGreetingItem) => {
-        const range: [number, number] = dayGreetingItem.range;
-        const greeting: string = dayGreetingItem.greeting;
-        if (hour >= range[FIRST_INDEX] && hour <= range[LAST_INDEX]) {
-          dayGreeting = greeting;
-        }
-      });
+    DAY_GREEINGS.forEach((dayGreetingItem) => {
+      const range: [number, number] = dayGreetingItem.range;
+      const greeting: string = dayGreetingItem.greeting;
+      if (hour >= range[FIRST_INDEX] && hour <= range[LAST_INDEX]) {
+        dayGreeting = greeting;
+      }
+    });
 
-      this.greeting.textContent = `${dayGreeting}, ${firstName}`;
-    }
+    this.greeting().textContent = `${dayGreeting}, ${firstName}`;
   }
 }

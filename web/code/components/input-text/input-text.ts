@@ -1,4 +1,4 @@
-import { Component } from "../../component.js";
+import { Component, type ElementSignal } from "../../component.js";
 
 const LABEL_NAME: string = "label";
 const PLACEHOLDER_NAME: string = "placeholder";
@@ -24,10 +24,10 @@ export class InputTextComponent extends Component {
     UPPERCASE_NAME,
   ];
 
-  private label: HTMLElement | null = null;
-  private input: HTMLInputElement | null = null;
-  private link: HTMLElement | null = null;
-  private error: HTMLElement | null = null;
+  private label: ElementSignal<Element> = this.element("#label");
+  private input: ElementSignal<HTMLInputElement> = this.element("#input");
+  private link: ElementSignal<Element> = this.element("#link");
+  private error: ElementSignal<Element> = this.element("#error");
 
   public validationMessage: string = "";
 
@@ -40,39 +40,30 @@ export class InputTextComponent extends Component {
   }
 
   protected renderError(errorMessage: string) {
-    if (this.error) {
-      if (errorMessage.length) {
-        this.error.textContent = errorMessage;
-      } else {
-        this.error.textContent = null;
-      }
+    if (errorMessage.length) {
+      this.error().textContent = errorMessage;
+    } else {
+      this.error().textContent = null;
     }
   }
 
   private bindEvents() {
-    if (this.input) {
-      this.input.addEventListener(CHANGE_EVENT, (event) => {
-        const target: HTMLInputElement = event.target as HTMLInputElement;
-        this.validationMessage = target.validationMessage;
-        this.renderError(target.validationMessage);
-      });
+    this.input().addEventListener(CHANGE_EVENT, (event) => {
+      const target: HTMLInputElement = event.target as HTMLInputElement;
+      this.validationMessage = target.validationMessage;
+      this.renderError(target.validationMessage);
+    });
 
-      this.input.addEventListener(INPUT_EVENT, (event) => {
-        const target: HTMLInputElement = event.target as HTMLInputElement;
+    this.input().addEventListener(INPUT_EVENT, (event) => {
+      const target: HTMLInputElement = event.target as HTMLInputElement;
 
-        this.dispatchCustomEvent(CHANGE_EVENT, {
-          detail: target.value,
-        });
+      this.dispatchCustomEvent(CHANGE_EVENT, {
+        detail: target.value,
       });
-    }
+    });
   }
 
   protected templateLoaded(): void {
-    this.label = this.document.querySelector("#label");
-    this.input = this.document.querySelector("#input");
-    this.link = this.document.querySelector("#link");
-    this.error = this.document.querySelector("#error");
-
     this.bindEvents();
   }
 
@@ -81,11 +72,11 @@ export class InputTextComponent extends Component {
   }
 
   public clear() {
-    if (this.input) this.input.value = EMPTY_STRING;
+    this.input().value = EMPTY_STRING;
   }
 
   public setValue(value: string) {
-    if (this.input) this.input.value = value;
+    this.input().value = value;
   }
 
   async attributeChangedCallback(
@@ -97,33 +88,29 @@ export class InputTextComponent extends Component {
 
     switch (name) {
       case LABEL_NAME:
-        if (this.label) this.label.textContent = newValue;
+        this.label().textContent = newValue;
         break;
       case INVALID_NAME:
-        if (this.input && this.error) {
-          this.input.setCustomValidity(newValue ?? EMPTY_STRING);
-          this.error.textContent = this.input.validationMessage;
-        }
+        this.input().setCustomValidity(newValue ?? EMPTY_STRING);
+        this.error().textContent = this.input().validationMessage;
         break;
       case PLACEHOLDER_NAME:
-        if (this.input) this.input.setAttribute(PLACEHOLDER_NAME, newValue);
+        this.input().setAttribute(PLACEHOLDER_NAME, newValue);
         break;
       case TYPE_NAME:
-        if (this.input) this.input.setAttribute(TYPE_NAME, newValue);
+        this.input().setAttribute(TYPE_NAME, newValue);
         break;
       case LINK_TEXT_NAME:
-        if (this.link) this.link.textContent = newValue;
+        this.link().textContent = newValue;
         break;
       case LINK_HREF_NAME:
-        if (this.link) this.link.setAttribute(LINK_HREF_NAME, newValue);
+        this.link().setAttribute(LINK_HREF_NAME, newValue);
         break;
       case UPPERCASE_NAME:
-        if (this.input) {
-          if (newValue) {
-            this.input.classList.add(UPPERCASE_NAME);
-          } else {
-            this.input.classList.remove(UPPERCASE_NAME);
-          }
+        if (newValue) {
+          this.input().classList.add(UPPERCASE_NAME);
+        } else {
+          this.input().classList.remove(UPPERCASE_NAME);
         }
         break;
     }
