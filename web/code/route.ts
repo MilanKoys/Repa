@@ -12,4 +12,8 @@ export const routes: Route[] = [
     path: "attendance",
     selector: "record-component",
   },
+  {
+    path: "user-list",
+    selector: "user-list-component",
+  },
 ];

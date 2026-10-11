@@ -20,26 +20,34 @@ const MENU_ITEM_SELECTOR: string = "menu-item-component";
 const MENU_ITEM_LABEL: string = "label";
 const MENU_ITEM_ACTIVE: string = "active";
 
+const EMPTY_STRING: string = "";
+
+const CLICK_EVENT: string = "click";
+
 const HIDDEN_CLASS: string = "hidden";
 
 const VISIBLE_NAME: string = "visible";
 const TRUE_VALUE: string = "true";
 
 const HOME_ROUTE: string = "home";
+const USER_LIST_ROUTE: string = "user-list";
 
-const MENU_ROUTE_LIST: string[] = [HOME_ROUTE];
+const HOME_LABEL: string = "Dashboard";
+const USER_LIST_LABEL: string = "Users";
+
+const MENU_ROUTE_LIST: string[] = [HOME_ROUTE, USER_LIST_ROUTE];
 
 const MENU_ROLE_LIST: Menu[] = [
   {
     role: Role.Admin,
     items: [
       {
-        label: "Dashboard",
-        path: "home",
+        label: HOME_LABEL,
+        path: HOME_ROUTE,
       },
       {
-        label: "Users",
-        path: "users",
+        label: USER_LIST_LABEL,
+        path: USER_LIST_ROUTE,
       },
     ],
   },
@@ -62,21 +70,18 @@ export class MenuComponent extends Component {
       } else {
         this.removeAttribute(VISIBLE_NAME);
       }
+
+      this.renderMenu();
     });
   }
 
-  private renderMenu(menuList: Menu) {
-    menuList.items.forEach((menuItem) => {
-      const itemElement = document.createElement(MENU_ITEM_SELECTOR);
-      itemElement.setAttribute(MENU_ITEM_LABEL, menuItem.label);
-      if (menuItem.path === this.navigationService.route) {
-        itemElement.setAttribute(MENU_ITEM_ACTIVE, TRUE_VALUE);
-      }
-      this.shell().appendChild(itemElement);
-    });
+  private navigate(menuItem: MenuItem, menuList: Menu) {
+    this.navigationService.navigate(menuItem.path);
   }
 
-  protected async templateLoaded() {
+  private async renderMenu() {
+    await this.initialized;
+
     const userProfile = await this.authService.loadUserProfile();
 
     if (!userProfile) return;
@@ -89,7 +94,22 @@ export class MenuComponent extends Component {
       return this.removeAttribute(VISIBLE_NAME);
     }
 
-    this.renderMenu(menuList);
+    this.shell().innerHTML = EMPTY_STRING;
+
+    menuList.items.forEach((menuItem) => {
+      const itemElement = document.createElement(MENU_ITEM_SELECTOR);
+      itemElement.setAttribute(MENU_ITEM_LABEL, menuItem.label);
+
+      itemElement.addEventListener(CLICK_EVENT, () => {
+        this.navigate(menuItem, menuList);
+      });
+
+      if (menuItem.path === this.navigationService.route) {
+        itemElement.setAttribute(MENU_ITEM_ACTIVE, TRUE_VALUE);
+      }
+
+      this.shell().appendChild(itemElement);
+    });
   }
 
   async attributeChangedCallback(

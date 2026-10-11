@@ -13,6 +13,7 @@ import { StatisticsComponent } from "./components/statistics/statistics.js";
 import { StatisticComponent } from "./components/statistic/statistic.js";
 import { MenuComponent } from "./components/menu/menu.js";
 import { MenuItemComponent } from "./components/menu-item/menu-item.js";
+import { UserListComponent } from "./components/user-list/user-list.js";
 
 const WS_PORT: number = 3000;
 const WS_URI: string = `ws://localhost:${WS_PORT}`;
@@ -33,3 +34,4 @@ customElements.define("statistics-component", StatisticsComponent);
 customElements.define("statistic-component", StatisticComponent);
 customElements.define("menu-component", MenuComponent);
 customElements.define("menu-item-component", MenuItemComponent);
+customElements.define("user-list-component", UserListComponent);

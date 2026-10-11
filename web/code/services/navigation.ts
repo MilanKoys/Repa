@@ -35,6 +35,7 @@ export class NavigationService {
     navigationElement.innerHTML = EMPTY_STRING;
     const route = this.routes.find((route) => route.path === routePath);
     if (!route) return;
+    this.route = route.path;
     const routeElement = document.createElement(route.selector);
     navigationElement.appendChild(routeElement);
     this.navigateListeners.forEach((listener) => listener(route));
