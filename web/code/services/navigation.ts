@@ -5,12 +5,16 @@ import { routes } from "../route.js";
 type Undefined<T> = undefined | T;
 type Nullable<T> = null | T;
 
+type NavigationListener = (route: Route) => void;
+
 const EMPTY_STRING: string = "";
 
 const HOME_ROUTE: string = "home";
 
 export class NavigationService {
   private static instance: Undefined<NavigationService>;
+
+  private navigateListeners: NavigationListener[] = [];
 
   public register: (element: HTMLElement) => void = () => {};
 
@@ -20,7 +24,7 @@ export class NavigationService {
 
   private readonly routes: Route[] = routes;
 
-  protected route: string = HOME_ROUTE;
+  public route: string = HOME_ROUTE;
 
   private constructor() {
     this.navigate(this.route);
@@ -33,6 +37,11 @@ export class NavigationService {
     if (!route) return;
     const routeElement = document.createElement(route.selector);
     navigationElement.appendChild(routeElement);
+    this.navigateListeners.forEach((listener) => listener(route));
+  }
+
+  public navigated(callback: NavigationListener) {
+    this.navigateListeners.push(callback);
   }
 
   public static inject() {

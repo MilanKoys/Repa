@@ -1,6 +1,12 @@
 type Undefined<T> = undefined | T;
 type Nullable<T> = null | T;
 
+export enum Role {
+  Student = "student",
+  Teacher = "teacher",
+  Admin = "admin",
+}
+
 export interface Session {
   email: string;
   timestamp: number;
@@ -11,6 +17,7 @@ export interface UserProfile {
   firstName: string;
   surName: string;
   emai: string;
+  role: Role;
 }
 
 const SESSION_COOKIE_NAME: string = "session";
