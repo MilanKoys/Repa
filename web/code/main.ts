@@ -10,6 +10,7 @@ import { DashboardComponent } from "./components/dashboard/dashboard.js";
 import { DetailComponent } from "./components/detail/detail.js";
 import { EntryComponent } from "./components/entry/entry.js";
 import { StatisticsComponent } from "./components/statistics/statistics.js";
+import { StatisticComponent } from "./components/statistic/statistic.js";
 
 const WS_PORT: number = 3000;
 const WS_URI: string = `ws://localhost:${WS_PORT}`;
@@ -27,3 +28,4 @@ customElements.define("dashboard-component", DashboardComponent);
 customElements.define("detail-component", DetailComponent);
 customElements.define("entry-component", EntryComponent);
 customElements.define("statistics-component", StatisticsComponent);
+customElements.define("statistic-component", StatisticComponent);

@@ -4,7 +4,13 @@ import { AttendanceService, ReportStatus } from "../../services/attendance.js";
 const HOUR_STRING: string = "h";
 const MINUTE_STRING: string = "min";
 const ONE_HOUR_MINUTES: number = 60;
+const DEFAULT_VALUE: string = "0";
+
 const EMPTY_STRING: string = "";
+
+const TEXT_ATTRIBUTE: string = "text";
+
+const HIDDEN_CLASS: string = "hidden";
 
 export class StatisticsComponent extends Component {
   private attendanceService = AttendanceService.inject();
@@ -22,30 +28,42 @@ export class StatisticsComponent extends Component {
     const records = await this.attendanceService.fetchRecords();
     const weekNumber = this.attendanceService.weekAmount;
     const thisWeek = records.find((record) => record.week === weekNumber);
-    if (!thisWeek) return;
 
-    const totalTime = thisWeek.rows
-      .map((row) => row.duration)
-      .reduce((accumulator: number, duration: number) => {
-        accumulator += duration;
-        return accumulator;
-      });
+    if (!records.length) {
+      this.logged().classList.add(HIDDEN_CLASS);
+      this.review().classList.add(HIDDEN_CLASS);
+      this.changes().classList.add(HIDDEN_CLASS);
+    }
 
-    const hours: number = Math.floor(totalTime / ONE_HOUR_MINUTES);
-    const minutes: number = totalTime - ONE_HOUR_MINUTES * hours;
-    const hourString: string = hours ? `${hours} ${HOUR_STRING}` : EMPTY_STRING;
+    if (!thisWeek) {
+      this.logged().setAttribute(TEXT_ATTRIBUTE, DEFAULT_VALUE);
+    } else {
+      const totalTime = thisWeek.rows
+        .map((row) => row.duration)
+        .reduce((accumulator: number, duration: number) => {
+          accumulator += duration;
+          return accumulator;
+        });
+
+      const hours: number = Math.floor(totalTime / ONE_HOUR_MINUTES);
+      const minutes: number = totalTime - ONE_HOUR_MINUTES * hours;
+      const hour: string = hours ? `${hours} ${HOUR_STRING}` : EMPTY_STRING;
+      const timeString: string = `${hour}  ${minutes} ${MINUTE_STRING}`;
+
+      this.logged().setAttribute(TEXT_ATTRIBUTE, timeString);
+    }
 
     const totalReview = records.filter((record) => {
       return record.status === ReportStatus.Submitted;
     });
 
+    this.review().setAttribute(TEXT_ATTRIBUTE, totalReview.length.toString());
+
     const totalChanges = records.filter((record) => {
       return record.status === ReportStatus.Rejected;
     });
 
-    this.logged().textContent = `${hourString}  ${minutes} ${MINUTE_STRING}`;
-    this.review().textContent = totalReview.length.toString();
-    this.changes().textContent = totalChanges.length.toString();
+    this.changes().setAttribute(TEXT_ATTRIBUTE, totalChanges.length.toString());
   }
 
   protected async templateLoaded() {

@@ -1,20 +1,14 @@
 <div class="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
-    <div
-        class="bg-white border p-4 border-slate-200 rounded-xl flex flex-col gap-1"
-    >
-        <p class="text-slate-500 text-xs">Logged this week</p>
-        <p id="logged" class="text-2xl font-semibold"></p>
-    </div>
-    <div
-        class="bg-white border p-4 border-slate-200 rounded-xl flex flex-col gap-1"
-    >
-        <p class="text-slate-500 text-xs">Weeks in review</p>
-        <p id="review" class="text-2xl font-semibold"></p>
-    </div>
-    <div
-        class="bg-white border p-4 border-slate-200 rounded-xl flex flex-col gap-1"
-    >
-        <p class="text-slate-500 text-xs">Changes requested</p>
-        <p id="changes" class="text-2xl font-semibold"></p>
-    </div>
+    <statistic-component
+        id="logged"
+        header="Logged this week"
+    ></statistic-component>
+    <statistic-component
+        id="review"
+        header="Weeks in review"
+    ></statistic-component>
+    <statistic-component
+        id="changes"
+        header="Changes requested"
+    ></statistic-component>
 </div>
