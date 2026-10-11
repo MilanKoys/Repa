@@ -10,7 +10,7 @@ import type {
 import type { Collection } from "mongodb";
 
 import { Server } from "#server";
-import { Collections, Method, ReportStatus } from "#enums";
+import { Collections, Method, ReportStatus, Role } from "#enums";
 import { Validator } from "#validator";
 import { Database } from "#database";
 import { UserLibrary } from "#library";
@@ -20,16 +20,20 @@ const READONLY_STATUSES: ReportStatus[] = [
   ReportStatus.Submitted,
 ];
 
+const MANAGEMENT_ROLES: Role[] = [Role.Admin, Role.Teacher];
+
 const database: Database = Database.init();
 const userLibrary: UserLibrary = UserLibrary.inject();
 
 export const attendanceRouter: Server = new Server();
 
+const queuePath: string = "/queue";
 const submitPath: string = "/submit";
 const listPath: string = "/list";
 const attendancePath: string = "/attendance";
 const attendanceListPath: string = `${attendancePath}${listPath}`;
 const attendanceSubmitPath: string = `${attendancePath}${submitPath}`;
+const attendanceQueuePath: string = `${attendancePath}${queuePath}`;
 
 const validator: Validator = new Validator();
 
@@ -44,6 +48,10 @@ const saveAttendanceSchema: Validator = validator.object({
 
 function containsStatus(report: Report, statuses: ReportStatus[]) {
   return statuses.some((status) => status === report.status);
+}
+
+function containsRole(user: User, roles: Role[]) {
+  return roles.some((role) => role === user.role);
 }
 
 const submitHandler = async (
@@ -235,6 +243,51 @@ const deleteHandler = async (
   response.outgoingMessage.end();
 };
 
+const reviewQueueHandler = async (
+  request: ServerRequest,
+  response: ServerResponse,
+) => {
+  const classNumber = request.incomingMessage.headers.class;
+
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  if (!containsRole(user, MANAGEMENT_ROLES)) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  if (classNumber && typeof classNumber !== "string") {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
+  const reports: Collection<Report> = database.collection(Collections.Reports);
+
+  const season = await seasons.findOne({ active: true });
+
+  if (!season) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  let filter = {
+    season: season.id,
+    status: ReportStatus.Submitted,
+  };
+
+  const queueList = await reports.find(filter).toArray();
+
+  response.json(queueList);
+};
+
 const saveHandler = async (
   request: ServerRequest,
   response: ServerResponse,
@@ -305,3 +358,4 @@ attendanceRouter.route(Method.Get, attendancePath, getHandler);
 attendanceRouter.route(Method.Delete, attendancePath, deleteHandler);
 attendanceRouter.route(Method.Get, attendanceListPath, listHandler);
 attendanceRouter.route(Method.Get, attendanceSubmitPath, submitHandler);
+attendanceRouter.route(Method.Get, attendanceQueuePath, reviewQueueHandler);
