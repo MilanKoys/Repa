@@ -31,27 +31,51 @@ const TRUE_VALUE: string = "true";
 
 const HOME_ROUTE: string = "home";
 const USER_LIST_ROUTE: string = "user-list";
+const REVIEW_QUEUE_ROUTE: string = "review-queue";
 
 const HOME_LABEL: string = "Dashboard";
 const USER_LIST_LABEL: string = "Users";
+const REVIEW_QUEUE_LABEL: string = "Review queue";
 
-const MENU_ROUTE_LIST: string[] = [HOME_ROUTE, USER_LIST_ROUTE];
-
-const MENU_ROLE_LIST: Menu[] = [
-  {
-    role: Role.Admin,
-    items: [
-      {
-        label: HOME_LABEL,
-        path: HOME_ROUTE,
-      },
-      {
-        label: USER_LIST_LABEL,
-        path: USER_LIST_ROUTE,
-      },
-    ],
-  },
+const MENU_ROUTE_LIST: string[] = [
+  HOME_ROUTE,
+  USER_LIST_ROUTE,
+  REVIEW_QUEUE_ROUTE,
 ];
+
+const ADMIN_ROUTE_LIST: Menu = {
+  role: Role.Admin,
+  items: [
+    {
+      label: HOME_LABEL,
+      path: HOME_ROUTE,
+    },
+    {
+      label: REVIEW_QUEUE_LABEL,
+      path: REVIEW_QUEUE_ROUTE,
+    },
+    {
+      label: USER_LIST_LABEL,
+      path: USER_LIST_ROUTE,
+    },
+  ],
+};
+
+const TEACHER_ROUTE_LIST: Menu = {
+  role: Role.Teacher,
+  items: [
+    {
+      label: REVIEW_QUEUE_LABEL,
+      path: REVIEW_QUEUE_ROUTE,
+    },
+    {
+      label: USER_LIST_LABEL,
+      path: USER_LIST_ROUTE,
+    },
+  ],
+};
+
+const MENU_ROLE_LIST: Menu[] = [ADMIN_ROUTE_LIST, TEACHER_ROUTE_LIST];
 
 export class MenuComponent extends Component {
   static observedAttributes = [VISIBLE_NAME];

@@ -16,4 +16,8 @@ export const routes: Route[] = [
     path: "user-list",
     selector: "user-list-component",
   },
+  {
+    path: "review-queue",
+    selector: "review-queue-component",
+  },
 ];
