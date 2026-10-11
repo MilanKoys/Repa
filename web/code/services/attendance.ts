@@ -54,24 +54,12 @@ const ATTENDANCE_LIST_PATH: string = `${ATTENDANCE_PATH}/list`;
 const ATTENDANCE_SUBMIT_PATH: string = `${ATTENDANCE_PATH}/submit`;
 const ACTIVE_SEASON_PATH: string = "/season/active";
 
-enum FetchingStatus {
-  Empty,
-  Loading,
-  Done,
-}
-
 export class AttendanceService {
   private static instance: Undefined<AttendanceService>;
 
   private initialize: () => void = () => {};
   public initialized: Promise<void> = new Promise((resolve) => {
     this.initialize = resolve;
-  });
-
-  private reportsResolver: (reports: Report[]) => void = () => {};
-  private reportsLoadingStatus: FetchingStatus = FetchingStatus.Empty;
-  private reports: Promise<Report[]> = new Promise((resolve) => {
-    this.reportsResolver = resolve;
   });
 
   public leaf: Undefined<ActiveLeaf>;
@@ -104,10 +92,9 @@ export class AttendanceService {
     return leaf;
   }
 
-  private async fetchRecords() {
+  public async fetchRecords(): Promise<Report[]> {
     const response: Response = await fetch(ATTENDANCE_LIST_PATH);
-    this.reportsResolver(await response.json());
-    this.reportsLoadingStatus = FetchingStatus.Done;
+    return await response.json();
   }
 
   public async saveRecord(week: number, rows: ReportRow[]) {
@@ -144,19 +131,6 @@ export class AttendanceService {
     } else {
       return null;
     }
-  }
-
-  public loadRecords(refresh: boolean = false) {
-    if (refresh || this.reportsLoadingStatus == FetchingStatus.Empty) {
-      this.reportsLoadingStatus = FetchingStatus.Loading;
-      this.reports = new Promise((resolve) => {
-        this.reportsResolver = resolve;
-      });
-
-      this.fetchRecords();
-    }
-
-    return this.reports;
   }
 
   public async fetchRecord(week: number): Promise<Nullable<Report>> {
