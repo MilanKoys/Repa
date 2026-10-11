@@ -185,7 +185,7 @@ export class WeeksComponent extends Component {
 
   protected async templateLoaded() {
     await this.attendanceService.initialized;
-    this.reportList = await this.attendanceService.fetchRecords();
+    this.reportList = await this.attendanceService.loadRecords(true);
 
     this.initialRender();
     this.bindEvents();
