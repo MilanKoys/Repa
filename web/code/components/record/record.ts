@@ -1,5 +1,9 @@
 import { Component, type ElementSignal } from "../../component.js";
-import { AttendanceService, ReportStatus } from "../../services/attendance.js";
+import {
+  AttendanceService,
+  ReportStatus,
+  type Report,
+} from "../../services/attendance.js";
 import { NavigationService } from "../../services/navigation.js";
 import type { DetailComponent } from "../detail/detail.js";
 
@@ -59,6 +63,11 @@ const STATUS_COLOR_SUBMITTED: string = "bg-orange-500";
 const STATUS_COLOR_APPROVED: string = "bg-green-600";
 const STATUS_COLOR_REJECTED: string = "bg-red-500";
 
+const SUBMITTABLE_STATUSES: ReportStatus[] = [
+  ReportStatus.Draft,
+  ReportStatus.Rejected,
+];
+
 const STATUS_COLOR_LIST: string[] = [
   STATUS_COLOR_EMPTY,
   STATUS_COLOR_DRAFT,
@@ -84,7 +93,6 @@ export class RecordComponent extends Component {
   private time: ElementSignal<Element> = this.element("#time");
   private count: ElementSignal<Element> = this.element("#count");
   private date: ElementSignal<Element> = this.element("#date");
-  private save: ElementSignal<Element> = this.element("#save");
   private dot: ElementSignal<Element> = this.element("#dot");
   private status: ElementSignal<Element> = this.element("#status");
   private submit: ElementSignal<Element> = this.element("#submit");
@@ -114,14 +122,10 @@ export class RecordComponent extends Component {
       this.readonly = true;
       this.add().classList.add(HIDDEN_CLASS);
       this.submit().classList.add(HIDDEN_CLASS);
-      this.save().classList.add(HIDDEN_CLASS);
-      this.done().classList.remove(HIDDEN_CLASS);
     } else {
       this.readonly = false;
       this.add().classList.remove(HIDDEN_CLASS);
       this.submit().classList.remove(HIDDEN_CLASS);
-      this.save().classList.remove(HIDDEN_CLASS);
-      this.done().classList.add(HIDDEN_CLASS);
     }
   }
 
@@ -152,6 +156,12 @@ export class RecordComponent extends Component {
     STATUS_COLOR_LIST.forEach((statusColor) => {
       this.dot().classList.remove(statusColor);
     });
+
+    if (SUBMITTABLE_STATUSES.some((subittable) => subittable === status)) {
+      this.submit().classList.remove(HIDDEN_CLASS);
+    } else {
+      this.submit().classList.add(HIDDEN_CLASS);
+    }
 
     switch (status) {
       case ReportStatus.Empty:
@@ -232,39 +242,40 @@ export class RecordComponent extends Component {
     this.renderEntries();
   }
 
+  private async updateRecord() {
+    const weekNumber: number = this.loadWeek();
+    const rows = this.entries.map((entry) => {
+      return {
+        type: entry.type,
+        duration: parseInt(entry.duration),
+        about: entry.about.length ? entry.about : undefined,
+      };
+    });
+
+    if (!rows.length) {
+      await this.attendanceService.deleteRecord(weekNumber);
+      this.setStatus(ReportStatus.Empty);
+    } else {
+      await this.attendanceService.saveRecord(weekNumber, rows);
+      this.setStatus(ReportStatus.Draft);
+    }
+  }
+
   private bindEvents() {
     const detail = this.detail;
-    const save = this.save;
     const submit = this.submit;
 
     detail().addEventListener(SUBMIT_EVENT, (event: Event) => {
       const customEvent: CustomEvent = event as CustomEvent;
       this.handleEntrySubmit(detail(), customEvent.detail);
+      this.updateRecord();
     });
 
     detail().addEventListener(DELETE_EVENT, (event: Event) => {
       const customEvent: CustomEvent = event as CustomEvent;
       this.entries.splice(customEvent.detail, ONE);
+      this.updateRecord();
       this.renderEntries();
-    });
-
-    save().addEventListener(CLICK_EVENT, async () => {
-      const weekNumber: number = this.loadWeek();
-      const rows = this.entries.map((entry) => {
-        return {
-          type: entry.type,
-          duration: parseInt(entry.duration),
-          about: entry.about.length ? entry.about : undefined,
-        };
-      });
-
-      if (!rows.length) {
-        await this.attendanceService.deleteRecord(weekNumber);
-        this.setStatus(ReportStatus.Empty);
-      } else {
-        await this.attendanceService.saveRecord(weekNumber, rows);
-        this.setStatus(ReportStatus.Draft);
-      }
     });
 
     submit().addEventListener(CLICK_EVENT, async () => {
