@@ -79,6 +79,7 @@ const submitHandler = async (
   const foundReport = await reports.findOne({
     season: season.id,
     week: parseInt(weekNumber),
+    user: user.email,
   });
 
   if (!foundReport) {
@@ -178,6 +179,62 @@ const getHandler = async (request: ServerRequest, response: ServerResponse) => {
   }
 };
 
+const deleteHandler = async (
+  request: ServerRequest,
+  response: ServerResponse,
+) => {
+  const weekNumber = request.incomingMessage.headers.week;
+
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  if (!weekNumber || typeof weekNumber !== "string") {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
+  const reports: Collection<Report> = database.collection(Collections.Reports);
+
+  const season = await seasons.findOne({ active: true });
+
+  if (!season) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const foundReport = await reports.findOne({
+    season: season.id,
+    week: parseInt(weekNumber),
+    user: user.email,
+  });
+
+  if (foundReport && containsStatus(foundReport, READONLY_STATUSES)) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  if (!foundReport) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const filter = {
+    week: foundReport.week,
+    season: season.id,
+    user: user.email,
+  };
+  await reports.deleteOne(filter);
+
+  response.outgoingMessage.end();
+};
+
 const saveHandler = async (
   request: ServerRequest,
   response: ServerResponse,
@@ -213,6 +270,7 @@ const saveHandler = async (
   const foundReport = await reports.findOne({
     season: season.id,
     week: body.week,
+    user: user.email,
   });
 
   if (foundReport && containsStatus(foundReport, READONLY_STATUSES)) {
@@ -244,5 +302,6 @@ const saveHandler = async (
 
 attendanceRouter.route(Method.Post, attendancePath, saveHandler);
 attendanceRouter.route(Method.Get, attendancePath, getHandler);
+attendanceRouter.route(Method.Delete, attendancePath, deleteHandler);
 attendanceRouter.route(Method.Get, attendanceListPath, listHandler);
 attendanceRouter.route(Method.Get, attendanceSubmitPath, submitHandler);

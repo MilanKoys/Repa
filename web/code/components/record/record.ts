@@ -258,8 +258,13 @@ export class RecordComponent extends Component {
         };
       });
 
-      await this.attendanceService.saveRecord(weekNumber, rows);
-      this.setStatus(ReportStatus.Draft);
+      if (!rows.length) {
+        await this.attendanceService.deleteRecord(weekNumber);
+        this.setStatus(ReportStatus.Empty);
+      } else {
+        await this.attendanceService.saveRecord(weekNumber, rows);
+        this.setStatus(ReportStatus.Draft);
+      }
     });
 
     submit().addEventListener(CLICK_EVENT, async () => {

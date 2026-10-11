@@ -43,6 +43,7 @@ export interface Report {
 }
 
 const POST_METHOD: string = "POST";
+const DELETE_METHOD: string = "DELETE";
 
 const DEFAULT_WEEK: number = 1;
 const WEEK_ADDED: number = 1;
@@ -104,6 +105,19 @@ export class AttendanceService {
     });
 
     return response;
+  }
+
+  public async deleteRecord(week: number) {
+    const response: Response = await fetch(ATTENDANCE_PATH, {
+      method: DELETE_METHOD,
+      headers: { week: week.toString() },
+    });
+
+    if (response.ok) {
+      return response;
+    } else {
+      return null;
+    }
   }
 
   public async submitRecord(week: number): Promise<Nullable<void>> {
