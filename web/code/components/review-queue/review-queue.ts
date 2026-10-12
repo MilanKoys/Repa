@@ -1,10 +1,22 @@
 import { Component, type ElementSignal } from "../../component.js";
 import { API_URL } from "../../constants/api.js";
 import type { Report } from "../../services/attendance.js";
-import { AuthentificationService } from "../../services/authentification.js";
+import {
+  AuthentificationService,
+  type UserProfile,
+} from "../../services/authentification.js";
+
+type Undefined<T> = undefined | T;
+
+type Queue = Report & {
+  user: UserProfile;
+};
+
+const TRUE_VALUE: string = "true";
 
 const QUEUE_ITEM_NAME: string = "name";
-const QUEUE_ITEM_CLASS: string = "class";
+const QUEUE_ITEM_CLASS: string = "class-name";
+const QUEUE_ITEM_LAST: string = "last";
 
 const DATE_STRING_TYPE: "long" = "long";
 const LOCALE: string = "en-US";
@@ -12,6 +24,8 @@ const LOCALE: string = "en-US";
 const QUEUE_API: string = "/attendance/queue";
 
 const HIDDEN_CLASS: string = "hidden";
+
+const ONE: 1 = 1;
 
 const QUEUE_ITEM_SELECTOR: string = "queue-item-component";
 
@@ -49,16 +63,27 @@ export class ReviewQueueComponent extends Component {
 
   private async loadQueue() {
     const response = await fetch(`${API_URL}${QUEUE_API}`);
-    const queue: Report[] = await response.json();
+    const queue: Queue[] = await response.json();
     return queue;
   }
 
   private async renderQueue() {
     const queue = await this.loadQueue();
 
-    queue.forEach((report) => {
+    queue.forEach((report, index) => {
       const queueElement = document.createElement(QUEUE_ITEM_SELECTOR);
-      queueElement.setAttribute(QUEUE_ITEM_NAME, report.user);
+      const fullName: string = `${report.user.firstName} ${report.user.surName}`;
+      const userClass: Undefined<number> = report.user.class;
+      queueElement.setAttribute(QUEUE_ITEM_NAME, fullName);
+
+      if (userClass) {
+        queueElement.setAttribute(QUEUE_ITEM_CLASS, `${userClass.toString()}V`);
+      }
+
+      if (index === queue.length - ONE) {
+        queueElement.setAttribute(QUEUE_ITEM_LAST, TRUE_VALUE);
+      }
+
       this.content().appendChild(queueElement);
     });
   }

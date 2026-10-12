@@ -7,7 +7,7 @@ import type {
   Undefined,
   User,
 } from "@types";
-import type { Collection, Filter } from "mongodb";
+import { Collection, type Document, type Filter } from "mongodb";
 
 import { Server } from "#server";
 import { Collections, Method, ReportStatus, Role } from "#enums";
@@ -21,6 +21,34 @@ const READONLY_STATUSES: ReportStatus[] = [
 ];
 
 const MANAGEMENT_ROLES: Role[] = [Role.Admin, Role.Teacher];
+
+const NO_PROJECT: number = 0;
+const QUEUE_FROM: string = Collections.Users;
+const QUEUE_LOCAL_FIELD: string = "user";
+const QUEUE_FOREIGN_FIELD: string = "email";
+const QUEUE_AS: string = "user";
+const QUEUE_FILTER_CLASS: (user: User) => { "user.email": string } = (user) => {
+  return { "user.email": user.email };
+};
+const QUEUE_LOOKUP: Document = {
+  $lookup: {
+    from: QUEUE_FROM,
+    localField: QUEUE_LOCAL_FIELD,
+    foreignField: QUEUE_FOREIGN_FIELD,
+    as: QUEUE_AS,
+  },
+};
+const QUEUE_UNWIND: Document = {
+  $unwind: `$${QUEUE_AS}`,
+};
+const QUEUE_PROJECT: Document = {
+  $project: {
+    user: {
+      session: NO_PROJECT,
+      password: NO_PROJECT,
+    },
+  },
+};
 
 const database: Database = Database.init();
 const userLibrary: UserLibrary = UserLibrary.inject();
@@ -279,26 +307,21 @@ const reviewQueueHandler = async (
     return response.outgoingMessage.end();
   }
 
-  let filter: Filter<Report> = {
-    season: season.id,
-    status: ReportStatus.Submitted,
-  };
+  let pipeline: Document[] = [QUEUE_LOOKUP, QUEUE_UNWIND, QUEUE_PROJECT];
 
   if (classNumber) {
     const userFilter = { class: parseInt(classNumber) };
     const userList = await users.find(userFilter).toArray();
-    const userEmailList = userList.map((user) => ({
-      user: user.email,
-    }));
+    const userEmailList = userList.map(QUEUE_FILTER_CLASS);
 
-    filter = {
-      season: season.id,
-      status: ReportStatus.Submitted,
-      $or: userEmailList,
-    };
+    pipeline.push({
+      $match: {
+        $or: userEmailList,
+      },
+    });
   }
 
-  const queueList = await reports.find(filter).toArray();
+  const queueList = await reports.aggregate(pipeline).toArray();
 
   response.json(queueList);
 };

@@ -1,10 +1,13 @@
 import { Component, type ElementSignal } from "../../component.js";
 
 const NAME_NAME: string = "name";
-const CLASS_NAME: string = "class";
+const CLASS_NAME: string = "class-name";
+const LAST_NAME: string = "last";
+
+const BORDER_BOTTOM_CLASS: string = "border-b";
 
 export class QueueItemComponent extends Component {
-  static observedAttributes = [NAME_NAME, CLASS_NAME];
+  static observedAttributes = [NAME_NAME, CLASS_NAME, LAST_NAME];
 
   private shell: ElementSignal<Element> = this.element("#shell");
   private avatar: ElementSignal<Element> = this.element("#avatar");
@@ -30,6 +33,10 @@ export class QueueItemComponent extends Component {
         break;
       case CLASS_NAME:
         this.class().textContent = newValue;
+        break;
+      case LAST_NAME:
+        console.log(2);
+        this.shell().classList.remove(BORDER_BOTTOM_CLASS);
         break;
     }
   }
