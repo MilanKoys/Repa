@@ -7,7 +7,7 @@ import type {
   Undefined,
   User,
 } from "@types";
-import type { Collection } from "mongodb";
+import type { Collection, Filter } from "mongodb";
 
 import { Server } from "#server";
 import { Collections, Method, ReportStatus, Role } from "#enums";
@@ -270,6 +270,7 @@ const reviewQueueHandler = async (
 
   const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
   const reports: Collection<Report> = database.collection(Collections.Reports);
+  const users: Collection<User> = database.collection(Collections.Users);
 
   const season = await seasons.findOne({ active: true });
 
@@ -278,10 +279,24 @@ const reviewQueueHandler = async (
     return response.outgoingMessage.end();
   }
 
-  let filter = {
+  let filter: Filter<Report> = {
     season: season.id,
     status: ReportStatus.Submitted,
   };
+
+  if (classNumber) {
+    const userFilter = { class: parseInt(classNumber) };
+    const userList = await users.find(userFilter).toArray();
+    const userEmailList = userList.map((user) => ({
+      user: user.email,
+    }));
+
+    filter = {
+      season: season.id,
+      status: ReportStatus.Submitted,
+      $or: userEmailList,
+    };
+  }
 
   const queueList = await reports.find(filter).toArray();
 
