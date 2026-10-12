@@ -15,6 +15,7 @@ import { MenuComponent } from "./components/menu/menu.js";
 import { MenuItemComponent } from "./components/menu-item/menu-item.js";
 import { UserListComponent } from "./components/user-list/user-list.js";
 import { ReviewQueueComponent } from "./components/review-queue/review-queue.js";
+import { QueueItemComponent } from "./components/queue-item/queue-item.js";
 
 const WS_PORT: number = 3000;
 const WS_URI: string = `ws://localhost:${WS_PORT}`;
@@ -37,3 +38,4 @@ customElements.define("menu-component", MenuComponent);
 customElements.define("menu-item-component", MenuItemComponent);
 customElements.define("user-list-component", UserListComponent);
 customElements.define("review-queue-component", ReviewQueueComponent);
+customElements.define("queue-item-component", QueueItemComponent);

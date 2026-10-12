@@ -16,8 +16,9 @@ export interface Session {
 export interface UserProfile {
   firstName: string;
   surName: string;
-  emai: string;
+  email: string;
   role: Role;
+  class?: number;
 }
 
 const SESSION_COOKIE_NAME: string = "session";
@@ -72,7 +73,7 @@ export class AuthentificationService {
     }
   }
 
-  public async loadUserProfile(): Promise<Undefined<UserProfile>> {
+  public async loadUserProfile(): Promise<UserProfile> {
     let userProfileRequest: Undefined<Promise<Response>>;
 
     try {
@@ -82,7 +83,7 @@ export class AuthentificationService {
 
       userProfileRequest = profileRequest;
     } catch (error) {
-      return undefined;
+      throw new Error("Cloud not load user profile.");
     }
 
     const profile: UserProfile = await userProfileRequest.then((response) => {
