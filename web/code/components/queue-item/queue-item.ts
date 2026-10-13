@@ -4,6 +4,11 @@ const NAME_NAME: string = "name";
 const CLASS_NAME: string = "class-name";
 const LAST_NAME: string = "last";
 
+const FIRST_INDEX: number = 0;
+const LAST_INDEX: number = 1;
+
+const NAME_DELIMITER: string = " ";
+
 const BORDER_BOTTOM_CLASS: string = "border-b";
 
 export class QueueItemComponent extends Component {
@@ -20,6 +25,18 @@ export class QueueItemComponent extends Component {
     this.loadTemplate("/components/queue-item/queue-item.html");
   }
 
+  private setAvatarName(name: string) {
+    const splitName = name.split(NAME_DELIMITER);
+    const firstName = splitName[FIRST_INDEX];
+    const lastName = splitName[LAST_INDEX];
+    if (firstName && lastName) {
+      const firstLetter: string = firstName.slice(FIRST_INDEX, LAST_INDEX);
+      const LastLetter: string = lastName.slice(FIRST_INDEX, LAST_INDEX);
+      const avatarName = `${firstLetter}${LastLetter}`;
+      this.avatar().textContent = avatarName;
+    }
+  }
+
   async attributeChangedCallback(
     name: string,
     _oldValue: string,
@@ -30,12 +47,12 @@ export class QueueItemComponent extends Component {
     switch (name) {
       case NAME_NAME:
         this.name().textContent = newValue;
+        this.setAvatarName(newValue);
         break;
       case CLASS_NAME:
         this.class().textContent = newValue;
         break;
       case LAST_NAME:
-        console.log(2);
         this.shell().classList.remove(BORDER_BOTTOM_CLASS);
         break;
     }
