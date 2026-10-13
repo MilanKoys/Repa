@@ -18,6 +18,9 @@ const STORAGE_WEEK_KEY: string = "week";
 
 const ATTENDANCE_PATH: string = "attendance";
 
+const WEEK_STRING: string = "Week";
+const DATE_DELIMITER: string = "·";
+
 const DEFAULT_USERNAME: string = "User";
 const DATE_STRING_TYPE: "long" = "long";
 const LOCALE: string = "en-US";
@@ -101,9 +104,10 @@ export class HeroComponent extends Component {
 
     const currentDate: Date = new Date();
 
+    const weekNumber: number = this.attendanceService.weekAmount;
     const dayName: string = this.getDayName(currentDate);
     const monthName: string = this.getMonthName(currentDate);
-    this.date().textContent = `${dayName} ${currentDate.getDate()} ${monthName} `;
+    this.date().textContent = `${dayName} ${currentDate.getDate()} ${monthName} ${DATE_DELIMITER} ${WEEK_STRING} ${weekNumber}`;
 
     this.record().addEventListener(CLICK_EVENT, () => {
       this.openWeek(this.attendanceService.weekAmount);
