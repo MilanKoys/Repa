@@ -30,6 +30,11 @@ const QUEUE_AS: string = "user";
 const QUEUE_FILTER_CLASS: (user: User) => { "user.email": string } = (user) => {
   return { "user.email": user.email };
 };
+const QUEUE_SUBMITTED_MATCH: Document = {
+  $match: {
+    status: ReportStatus.Submitted,
+  },
+};
 const QUEUE_LOOKUP: Document = {
   $lookup: {
     from: QUEUE_FROM,
@@ -307,7 +312,12 @@ const reviewQueueHandler = async (
     return response.outgoingMessage.end();
   }
 
-  let pipeline: Document[] = [QUEUE_LOOKUP, QUEUE_UNWIND, QUEUE_PROJECT];
+  let pipeline: Document[] = [
+    QUEUE_LOOKUP,
+    QUEUE_UNWIND,
+    QUEUE_PROJECT,
+    QUEUE_SUBMITTED_MATCH,
+  ];
 
   if (classNumber) {
     const userFilter = { class: parseInt(classNumber) };
