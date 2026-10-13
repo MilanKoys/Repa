@@ -71,6 +71,7 @@ export class ReviewQueueComponent extends Component {
 
   private async classSetup() {
     const userProfile = await this.userProfile;
+    console.log(userProfile);
 
     if (!userProfile.class) {
       this.class().classList.add(HIDDEN_CLASS);

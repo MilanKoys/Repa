@@ -27,6 +27,7 @@ const userProfileHandler = async (
     surName: user.surName,
     email: user.email,
     role: user.role,
+    class: user.class,
   });
 };
 
