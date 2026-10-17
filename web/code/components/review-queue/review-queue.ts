@@ -18,9 +18,13 @@ const QUEUE_ITEM_NAME: string = "name";
 const QUEUE_ITEM_CLASS: string = "class-name";
 const QUEUE_ITEM_LAST: string = "last";
 const QUEUE_ITEM_WEEK: string = "week";
+const QUEUE_ITEM_CONTENT: string = "content";
+const QUEUE_ITEM_DATE: string = "date";
 
 const DATE_STRING_TYPE: "long" = "long";
 const LOCALE: string = "en-US";
+
+const WEEK_MILLISECONDS: number = 604800000;
 
 const QUEUE_API: string = "/attendance/queue";
 
@@ -39,6 +43,8 @@ const QUEUE_ITEM_SELECTOR: string = "queue-item-component";
 
 const WEEK_STRING: string = "Week";
 const DATE_DELIMITER: string = "·";
+
+const JOIN_DELIMITER: string = ",";
 
 const NO_WEEK_STRING: string = "No";
 const EMPTY_QUEUE_STRING = "All caught up — nothing waiting for review.";
@@ -100,8 +106,24 @@ export class ReviewQueueComponent extends Component {
       const queueElement = document.createElement(QUEUE_ITEM_SELECTOR);
       const fullName: string = `${report.user.firstName} ${report.user.surName}`;
       const userClass: Undefined<number> = report.user.class;
+      const leaf = this.attendanceService.leaf;
+      const content: string = report.rows
+        .map((row) => row.type)
+        .join(JOIN_DELIMITER);
+
+      let dateString: string = "No date";
+      if (leaf && leaf.season) {
+        const start = leaf.season.start;
+        const date = new Date(start + WEEK_MILLISECONDS * report.week);
+        const dayName: string = this.getDayName(date);
+        const monthName: string = this.getMonthName(date);
+        dateString = `${dayName} ${date.getDate()} ${monthName}`;
+      }
+
       queueElement.setAttribute(QUEUE_ITEM_NAME, fullName);
       queueElement.setAttribute(QUEUE_ITEM_WEEK, report.week.toString());
+      queueElement.setAttribute(QUEUE_ITEM_CONTENT, content);
+      queueElement.setAttribute(QUEUE_ITEM_DATE, dateString);
 
       if (userClass) {
         queueElement.setAttribute(QUEUE_ITEM_CLASS, `${userClass.toString()}V`);

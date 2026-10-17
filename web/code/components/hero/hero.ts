@@ -30,18 +30,18 @@ const LAST_INDEX: 1 = 1;
 
 const MORNING_RANGE: [number, number] = [0, 12];
 const AFTERNOON_RANGE: [number, number] = [13, 15];
-const NOON_RANGE: [number, number] = [16, 19];
+const EVENING_RANGE: [number, number] = [16, 19];
 const NIGHT_RANGE: [number, number] = [20, 24];
 
 const MORNING_GREETING: string = "Good morning";
 const AFTERNOON_GREETING: string = "Good afternoon";
-const NOON_GREETING: string = "Good noon";
+const EVENING_GREETING: string = "Good evening";
 const NIGHT_GREETING: string = "Good night";
 
 const DAY_GREETING_LIST: [[number, number], string][] = [
   [MORNING_RANGE, MORNING_GREETING],
   [AFTERNOON_RANGE, AFTERNOON_GREETING],
-  [NOON_RANGE, NOON_GREETING],
+  [EVENING_RANGE, EVENING_GREETING],
   [NIGHT_RANGE, NIGHT_GREETING],
 ];
 

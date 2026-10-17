@@ -3,17 +3,37 @@ import { Component, type ElementSignal } from "../../component.js";
 const NAME_NAME: string = "name";
 const CLASS_NAME: string = "class-name";
 const LAST_NAME: string = "last";
+const CONTENT_NAME: string = "content";
 const WEEK_NAME: string = "week";
+const DATE_NAME: string = "date";
+
+const CONTENT_CLASSES: string[] = [
+  "p-1",
+  "rounded",
+  "bg-slate-100",
+  "text-xs",
+  "font-semibold",
+];
+
+const CONTENT_ELEMENT: string = "p";
 
 const FIRST_INDEX: number = 0;
 const LAST_INDEX: number = 1;
 
+const SPLIT_DELIMITER: string = ",";
 const NAME_DELIMITER: string = " ";
 
 const BORDER_BOTTOM_CLASS: string = "border-b";
 
 export class QueueItemComponent extends Component {
-  static observedAttributes = [NAME_NAME, CLASS_NAME, LAST_NAME, WEEK_NAME];
+  static observedAttributes = [
+    NAME_NAME,
+    CLASS_NAME,
+    LAST_NAME,
+    WEEK_NAME,
+    CONTENT_NAME,
+    DATE_NAME,
+  ];
 
   private shell: ElementSignal<Element> = this.element("#shell");
   private avatar: ElementSignal<Element> = this.element("#avatar");
@@ -21,6 +41,8 @@ export class QueueItemComponent extends Component {
   private class: ElementSignal<Element> = this.element("#class");
   private review: ElementSignal<Element> = this.element("#review");
   private week: ElementSignal<Element> = this.element("#week");
+  private content: ElementSignal<Element> = this.element("#content");
+  private date: ElementSignal<Element> = this.element("#date");
 
   constructor() {
     super();
@@ -59,6 +81,18 @@ export class QueueItemComponent extends Component {
         break;
       case LAST_NAME:
         this.shell().classList.remove(BORDER_BOTTOM_CLASS);
+        break;
+      case DATE_NAME:
+        this.date().textContent = newValue;
+        break;
+      case CONTENT_NAME:
+        const items = newValue.split(SPLIT_DELIMITER);
+        for (const item of items) {
+          const itemElement = document.createElement(CONTENT_ELEMENT);
+          itemElement.classList.add(...CONTENT_CLASSES);
+          itemElement.textContent = item;
+          this.content().appendChild(itemElement);
+        }
         break;
     }
   }
