@@ -34,6 +34,7 @@ export interface CreateReport {
 }
 
 export interface Report {
+  _id: string;
   rows: ReportRow[];
   week: number;
   season: string;

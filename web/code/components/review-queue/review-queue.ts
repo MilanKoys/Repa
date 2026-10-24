@@ -5,12 +5,15 @@ import {
   AuthentificationService,
   type UserProfile,
 } from "../../services/authentification.js";
+import { NavigationService } from "../../services/navigation.js";
 
 type Undefined<T> = undefined | T;
 
 type Queue = Report & {
   user: UserProfile;
 };
+
+const CLICK_EVENT: string = "click";
 
 const TRUE_VALUE: string = "true";
 
@@ -41,6 +44,10 @@ const ONE: 1 = 1;
 
 const QUEUE_ITEM_SELECTOR: string = "queue-item-component";
 
+const STORAGE_RECORD_KEY: string = "record_id";
+
+const ATTENDANCE_PATH: string = "attendance";
+
 const WEEK_STRING: string = "Week";
 const DATE_DELIMITER: string = "·";
 
@@ -56,6 +63,7 @@ const MONTH_END: number = 3;
 export class ReviewQueueComponent extends Component {
   private authService = AuthentificationService.inject();
   private attendanceService = AttendanceService.inject();
+  private navigationService = NavigationService.inject();
 
   private date: ElementSignal<Element> = this.element("#date");
   private content: ElementSignal<Element> = this.element("#content");
@@ -79,9 +87,13 @@ export class ReviewQueueComponent extends Component {
     return date.toLocaleDateString(LOCALE, { month: DATE_STRING_TYPE });
   }
 
+  private openRecord(identifier: string) {
+    sessionStorage.setItem(STORAGE_RECORD_KEY, identifier);
+    this.navigationService.navigate(ATTENDANCE_PATH);
+  }
+
   private async classSetup() {
     const userProfile = await this.userProfile;
-    console.log(userProfile);
 
     if (!userProfile.class) {
       this.class().classList.add(HIDDEN_CLASS);
@@ -114,6 +126,10 @@ export class ReviewQueueComponent extends Component {
       const content: string = report.rows
         .map((row) => row.type)
         .join(JOIN_DELIMITER);
+
+      queueElement.addEventListener(CLICK_EVENT, () => {
+        this.openRecord(report._id);
+      });
 
       let dateString: string = DEFAULT_DATE_STRING;
       if (leaf && leaf.season) {

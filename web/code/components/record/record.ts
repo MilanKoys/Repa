@@ -35,6 +35,8 @@ const ENTRY_OPEN_ATTRIBUTE: string = "open";
 const ENTRY_OPEN_VALUE: string = "true";
 
 const STORAGE_WEEK_KEY: string = "week";
+const STORAGE_RECORD_KEY: string = "record_id";
+
 const BASE_WEEK_STRING: string = "1";
 
 const HOUR_STRING: string = "h";
@@ -391,6 +393,10 @@ export class RecordComponent extends Component {
     await this.attendanceService.initialized;
 
     const weekNumber = this.loadWeek();
+
+    const recordIdentifier = sessionStorage.getItem(STORAGE_RECORD_KEY);
+
+    console.log(recordIdentifier);
 
     await this.loadEntries(weekNumber);
     this.renderWeek(weekNumber);

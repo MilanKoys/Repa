@@ -7,7 +7,7 @@ import type {
   Undefined,
   User,
 } from "@types";
-import { Collection, type Document, type Filter } from "mongodb";
+import { Collection, ObjectId, type Document, type Filter } from "mongodb";
 
 import { Server } from "#server";
 import { Collections, Method, ReportStatus, Role } from "#enums";
@@ -64,9 +64,11 @@ const queuePath: string = "/queue";
 const submitPath: string = "/submit";
 const listPath: string = "/list";
 const attendancePath: string = "/attendance";
+const reviewPath: string = "/review";
 const attendanceListPath: string = `${attendancePath}${listPath}`;
 const attendanceSubmitPath: string = `${attendancePath}${submitPath}`;
 const attendanceQueuePath: string = `${attendancePath}${queuePath}`;
+const attendanceReviewPath: string = `${attendancePath}${reviewPath}`;
 
 const validator: Validator = new Validator();
 
@@ -86,6 +88,48 @@ function containsStatus(report: Report, statuses: ReportStatus[]) {
 function containsRole(user: User, roles: Role[]) {
   return roles.some((role) => role === user.role);
 }
+
+const reviewHandler = async (
+  request: ServerRequest,
+  response: ServerResponse,
+) => {
+  const reportIdentifier = request.incomingMessage.headers.identifier;
+
+  const cookies = request.incomingMessage.headers.cookie;
+
+  const user: Undefined<User> = await userLibrary.cookiesUser(cookies);
+
+  if (!user || !containsRole(user, [Role.Admin, Role.Teacher])) {
+    response.outgoingMessage.statusCode = 401;
+    return response.outgoingMessage.end();
+  }
+
+  if (!reportIdentifier || typeof reportIdentifier !== "string") {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const seasons: Collection<Leaf> = database.collection(Collections.Seasons);
+  const reports: Collection<Report> = database.collection(Collections.Reports);
+
+  const season = await seasons.findOne({ active: true });
+
+  if (!season) {
+    response.outgoingMessage.statusCode = 400;
+    return response.outgoingMessage.end();
+  }
+
+  const report = await reports.findOne({
+    _id: new ObjectId(reportIdentifier),
+  });
+
+  if (report) {
+    response.json(report);
+  } else {
+    response.outgoingMessage.statusCode = 404;
+    response.outgoingMessage.end();
+  }
+};
 
 const submitHandler = async (
   request: ServerRequest,
@@ -407,3 +451,4 @@ attendanceRouter.route(Method.Delete, attendancePath, deleteHandler);
 attendanceRouter.route(Method.Get, attendanceListPath, listHandler);
 attendanceRouter.route(Method.Get, attendanceSubmitPath, submitHandler);
 attendanceRouter.route(Method.Get, attendanceQueuePath, reviewQueueHandler);
+attendanceRouter.route(Method.Get, attendanceReviewPath, reviewHandler);
