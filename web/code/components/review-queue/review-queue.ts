@@ -49,6 +49,10 @@ const JOIN_DELIMITER: string = ",";
 const NO_WEEK_STRING: string = "No";
 const EMPTY_QUEUE_STRING = "All caught up — nothing waiting for review.";
 
+const DEFAULT_DATE_STRING: string = "No date";
+const MONTH_START: number = 0;
+const MONTH_END: number = 3;
+
 export class ReviewQueueComponent extends Component {
   private authService = AuthentificationService.inject();
   private attendanceService = AttendanceService.inject();
@@ -111,13 +115,14 @@ export class ReviewQueueComponent extends Component {
         .map((row) => row.type)
         .join(JOIN_DELIMITER);
 
-      let dateString: string = "No date";
+      let dateString: string = DEFAULT_DATE_STRING;
       if (leaf && leaf.season) {
         const start = leaf.season.start;
-        const date = new Date(start + WEEK_MILLISECONDS * report.week);
-        const dayName: string = this.getDayName(date);
-        const monthName: string = this.getMonthName(date);
-        dateString = `${dayName} ${date.getDate()} ${monthName}`;
+        const dateStart = new Date(start + WEEK_MILLISECONDS * report.week);
+        const dateEnd = new Date(dateStart.getTime() + WEEK_MILLISECONDS);
+        const monthStartName: string = this.getMonthName(dateStart);
+        const monthEndName: string = this.getMonthName(dateEnd);
+        dateString = `${dateStart.getDate()} ${monthStartName.slice(MONTH_START, MONTH_END)} - ${dateEnd.getDate()} ${monthEndName.slice(MONTH_START, MONTH_END)}`;
       }
 
       queueElement.setAttribute(QUEUE_ITEM_NAME, fullName);
