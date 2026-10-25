@@ -7,11 +7,19 @@ const INVALID_NAME: string = "invalid";
 const LINK_TEXT_NAME: string = "link";
 const LINK_HREF_NAME: string = "href";
 const UPPERCASE_NAME: string = "uppercase";
+const SIZE_NAME: string = "size";
+
+const FIRST_INDEX: 1 = 1;
 
 const CHANGE_EVENT: string = "change";
 const INPUT_EVENT: string = "input";
 
 const EMPTY_STRING: string = "";
+
+const SIZE_MAP: { [key: string]: string } = {
+  small: "py-1.5",
+  large: "py-2.5",
+};
 
 export class InputTextComponent extends Component {
   static observedAttributes = [
@@ -22,6 +30,7 @@ export class InputTextComponent extends Component {
     LINK_HREF_NAME,
     INVALID_NAME,
     UPPERCASE_NAME,
+    SIZE_NAME,
   ];
 
   private label: ElementSignal<Element> = this.element("#label");
@@ -73,6 +82,9 @@ export class InputTextComponent extends Component {
 
   public clear() {
     this.input().value = EMPTY_STRING;
+    this.dispatchCustomEvent(CHANGE_EVENT, {
+      detail: EMPTY_STRING,
+    });
   }
 
   public setValue(value: string) {
@@ -87,6 +99,23 @@ export class InputTextComponent extends Component {
     await this.initialized;
 
     switch (name) {
+      case SIZE_NAME:
+        Object.entries(SIZE_MAP).forEach(([key, value]) => {
+          this.input().classList.remove(value);
+        });
+
+        const sizeKey = Object.keys(SIZE_MAP).find((key) => {
+          return key === newValue;
+        });
+
+        if (!sizeKey) return;
+
+        const sizeValue = SIZE_MAP[sizeKey];
+
+        if (!sizeValue) return;
+
+        this.input().classList.add(sizeValue);
+        break;
       case LABEL_NAME:
         this.label().textContent = newValue;
         break;

@@ -13,12 +13,14 @@ interface Entry {
   type: string;
   duration: string;
   about: string;
+  commnet?: string;
 }
 
 const TRUE_VALUE: string = "true";
 
 const ENTRY_SELECTOR: string = "entry-component";
 const ENTRY_TYPE_ATTRIBUTE: string = "type";
+const ENTRY_REVIEW_ATTRIBUTE: string = "review";
 const ENTRY_ABOUT_ATTRIBUTE: string = "about";
 const ENTRY_DURATION_ATTRIBUTE: string = "duration";
 const ENTRY_ID_ATTRIBUTE: string = "identifier";
@@ -51,6 +53,7 @@ const REVIEW_QUEUE_PATH: string = "review-queue";
 const ONE: 1 = 1;
 
 const CLICK_EVENT: string = "click";
+const CHANGE_EVENT: string = "change";
 const SUBMIT_EVENT: string = "submit";
 const DELETE_EVENT: string = "delete";
 
@@ -209,6 +212,22 @@ export class RecordComponent extends Component {
       entryElement.setAttribute(ENTRY_ABOUT_ATTRIBUTE, entry.about);
       entryElement.setAttribute(ENTRY_DURATION_ATTRIBUTE, entry.duration);
       entryElement.setAttribute(ENTRY_ID_ATTRIBUTE, index.toString());
+
+      entryElement.addEventListener(CHANGE_EVENT, (event) => {
+        const customEvent: CustomEvent = event as CustomEvent;
+        if (this.entries[index]) {
+          if (customEvent.detail) {
+            this.entries[index].commnet = customEvent.detail;
+          } else {
+            delete this.entries[index].commnet;
+          }
+        }
+      });
+
+      if (this.review) {
+        entryElement.setAttribute(ENTRY_READONLY_ATTRIBUTE, TRUE_VALUE);
+        entryElement.setAttribute(ENTRY_REVIEW_ATTRIBUTE, TRUE_VALUE);
+      }
 
       if (this.readonly) {
         entryElement.setAttribute(ENTRY_READONLY_ATTRIBUTE, TRUE_VALUE);

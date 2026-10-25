@@ -128,7 +128,7 @@ const reviewHandler = async (
 
   pipeline.push({
     $match: {
-      _id: new ObjectId(reportIdentifier);
+      _id: new ObjectId(reportIdentifier),
     },
   });
 
