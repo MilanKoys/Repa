@@ -1,3 +1,4 @@
+import type { Queue } from "../components/review-queue/review-queue.js";
 import { API_URL } from "../constants/api.js";
 
 type Undefined<T> = undefined | T;
@@ -51,6 +52,7 @@ const WEEK_ADDED: number = 1;
 const WEEK_MILLISECONDS: number = 604800000;
 
 const ATTENDANCE_PATH: string = "/attendance";
+const REVIEW_PATH: string = `${ATTENDANCE_PATH}/review`;
 const ATTENDANCE_LIST_PATH: string = `${ATTENDANCE_PATH}/list`;
 const ATTENDANCE_SUBMIT_PATH: string = `${ATTENDANCE_PATH}/submit`;
 const ACTIVE_SEASON_PATH: string = "/season/active";
@@ -129,6 +131,18 @@ export class AttendanceService {
 
     if (response.ok) {
       return;
+    } else {
+      return null;
+    }
+  }
+
+  public async fetchRecordById(identifier: string): Promise<Nullable<Queue>> {
+    const response: Response = await fetch(REVIEW_PATH, {
+      headers: { identifier },
+    });
+
+    if (response.ok) {
+      return await response.json();
     } else {
       return null;
     }

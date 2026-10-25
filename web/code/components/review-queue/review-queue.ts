@@ -9,7 +9,7 @@ import { NavigationService } from "../../services/navigation.js";
 
 type Undefined<T> = undefined | T;
 
-type Queue = Report & {
+export type Queue = Report & {
   user: UserProfile;
 };
 

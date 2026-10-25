@@ -46,6 +46,8 @@ const ONE_HOUR_MINUTES: number = 60;
 
 const DASHBOARD_PATH: string = "home";
 
+const REVIEW_QUEUE_PATH: string = "review-queue";
+
 const ONE: 1 = 1;
 
 const CLICK_EVENT: string = "click";
@@ -83,12 +85,14 @@ export class RecordComponent extends Component {
   private attendanceService = AttendanceService.inject();
 
   private readonly: boolean = false;
+  private review: Nullable<string> = null;
 
   private detail: ElementSignal<DetailComponent> = this.element("#detail");
   private week: ElementSignal<Element> = this.element("#week");
   private next: ElementSignal<Element> = this.element("#next");
   private previous: ElementSignal<Element> = this.element("#previous");
   private back: ElementSignal<Element> = this.element("#back");
+  private backText: ElementSignal<Element> = this.element("#back_text");
   private add: ElementSignal<Element> = this.element("#add");
   private empty: ElementSignal<Element> = this.element("#empty");
   private content: ElementSignal<Element> = this.element("#content");
@@ -219,9 +223,9 @@ export class RecordComponent extends Component {
     this.content().classList.remove(HIDDEN_CLASS);
   }
 
-  private renderWeek(number: number) {
-    this.week().textContent = `${number}`;
-    this.detail().setAttribute(DETAIL_WEEK_ATTRIBUTE, `${number}`);
+  private renderWeek(content: string) {
+    this.week().textContent = `${content}`;
+    this.detail().setAttribute(DETAIL_WEEK_ATTRIBUTE, `${content}`);
   }
 
   private reset() {
@@ -289,7 +293,11 @@ export class RecordComponent extends Component {
 
   private bindBack(element: Element) {
     element.addEventListener(CLICK_EVENT, () => {
-      this.navigationService.navigate(DASHBOARD_PATH);
+      if (this.review) {
+        this.navigationService.navigate(REVIEW_QUEUE_PATH);
+      } else {
+        this.navigationService.navigate(DASHBOARD_PATH);
+      }
     });
   }
 
@@ -307,8 +315,21 @@ export class RecordComponent extends Component {
     });
   }
 
+  private bindReviewNavigation() {
+    this.done().classList.add(HIDDEN_CLASS);
+    this.next().classList.add(HIDDEN_CLASS);
+    this.previous().classList.add(HIDDEN_CLASS);
+    this.backText().textContent = "Back to queue";
+  }
+
   private bindNavigation() {
     this.bindBack(this.back());
+
+    if (this.review) {
+      this.bindReviewNavigation();
+      return;
+    }
+
     this.bindBack(this.done());
 
     const nextCheck = (weekNumber: number) => {
@@ -362,13 +383,37 @@ export class RecordComponent extends Component {
     this.setStatus(ReportStatus.Empty);
     await this.loadEntries(weekNumber);
     this.renderDate(weekNumber);
-    this.renderWeek(weekNumber);
+    this.renderWeek(`Week ${weekNumber.toString()}`);
   }
 
   private loadWeek() {
     const storedWeekString = sessionStorage.getItem(STORAGE_WEEK_KEY);
     const storedWeek: number = parseInt(storedWeekString ?? BASE_WEEK_STRING);
     return storedWeek;
+  }
+
+  private async loadEntriesByIdentifier(identifier: string) {
+    const report = await this.attendanceService.fetchRecordById(identifier);
+
+    if (report) {
+      const reports = report.rows.map((row) => {
+        return {
+          type: row.type,
+          about: row.about ?? EMPTY_STRING,
+          duration: row.duration.toString(),
+        };
+      });
+
+      sessionStorage.setItem(STORAGE_WEEK_KEY, report.week.toString());
+      this.renderWeek(
+        `${report.user.firstName} ${report.user.surName} · Week ${report.week.toString()}`,
+      );
+      this.renderDate(report.week);
+
+      this.setStatus(report.status);
+      this.entries = reports;
+      this.renderEntries();
+    }
   }
 
   private async loadEntries(weekNumber: number) {
@@ -383,6 +428,9 @@ export class RecordComponent extends Component {
         };
       });
 
+      this.renderWeek(`Week ${report.week.toString()}`);
+      this.renderDate(report.week);
+
       this.setStatus(report.status);
       this.entries = reports;
       this.renderEntries();
@@ -395,12 +443,15 @@ export class RecordComponent extends Component {
     const weekNumber = this.loadWeek();
 
     const recordIdentifier = sessionStorage.getItem(STORAGE_RECORD_KEY);
+    sessionStorage.removeItem(STORAGE_RECORD_KEY);
 
-    console.log(recordIdentifier);
+    if (recordIdentifier) {
+      this.review = recordIdentifier;
+      await this.loadEntriesByIdentifier(recordIdentifier);
+    } else {
+      await this.loadEntries(weekNumber);
+    }
 
-    await this.loadEntries(weekNumber);
-    this.renderWeek(weekNumber);
-    this.renderDate(weekNumber);
     this.bindNavigation();
     this.bindEvents();
   }

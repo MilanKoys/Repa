@@ -119,9 +119,20 @@ const reviewHandler = async (
     return response.outgoingMessage.end();
   }
 
-  const report = await reports.findOne({
-    _id: new ObjectId(reportIdentifier),
+  let pipeline: Document[] = [
+    QUEUE_LOOKUP,
+    QUEUE_UNWIND,
+    QUEUE_PROJECT,
+    QUEUE_SUBMITTED_MATCH,
+  ];
+
+  pipeline.push({
+    $match: {
+      _id: new ObjectId(reportIdentifier);
+    },
   });
+
+  const report = await reports.aggregate(pipeline).next();
 
   if (report) {
     response.json(report);
