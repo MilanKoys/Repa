@@ -30,6 +30,7 @@ const DETAIL_WEEK_ATTRIBUTE: string = "week";
 const DETAIL_DATE_ATTRIBUTE: string = "date";
 
 const HIDDEN_CLASS: string = "hidden";
+const FLEX_CLASS: string = "flex";
 
 const EMPTY_STRING: string = "";
 
@@ -106,6 +107,8 @@ export class RecordComponent extends Component {
   private status: ElementSignal<Element> = this.element("#status");
   private submit: ElementSignal<Element> = this.element("#submit");
   private done: ElementSignal<Element> = this.element("#done");
+  private reviewAction: ElementSignal<Element> =
+    this.element("#review_actions");
 
   private entries: Entry[] = [];
 
@@ -290,6 +293,11 @@ export class RecordComponent extends Component {
     const detail = this.detail;
     const submit = this.submit;
 
+    if (this.review) {
+      this.reviewAction().classList.remove(HIDDEN_CLASS);
+      this.reviewAction().classList.add(FLEX_CLASS);
+    }
+
     detail().addEventListener(SUBMIT_EVENT, (event: Event) => {
       const customEvent: CustomEvent = event as CustomEvent;
       this.handleEntrySubmit(detail(), customEvent.detail);
@@ -453,6 +461,9 @@ export class RecordComponent extends Component {
       this.setStatus(report.status);
       this.entries = reports;
       this.renderEntries();
+    } else {
+      this.renderWeek(`Week ${weekNumber}`);
+      this.renderDate(weekNumber);
     }
   }
 
